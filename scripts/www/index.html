@@ -1,594 +1,1421 @@
 <!DOCTYPE html>
+
 <html lang="zh">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🐇 双兔养成 · 沐然宁宁的胡萝卜乐园</title>
+
+    <title>🐇 双兔养成 · 沐然宁宁的兔兔乐园</title>
+
     <style>
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
+
             background: linear-gradient(145deg, #fdefe0 0%, #ffe6c9 100%);
+
             min-height: 100vh;
+
             display: flex; justify-content: center; align-items: center;
+
             font-family: 'Segoe UI', 'Quicksand', system-ui, sans-serif;
+
             padding: 16px;
+
         }
+
         .game-container {
-            max-width: 1200px; width: 100%;
+
+            max-width: 800px;
+
+            width: 100%;
+
             background: rgba(255, 245, 235, 0.7);
+
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+
             border-radius: 64px 64px 48px 48px;
+
             box-shadow: 0 20px 40px rgba(180, 100, 30, 0.15);
+
             padding: 24px 20px 30px;
+
             border: 2px solid #fff3e6;
+
         }
+
         h1 {
-            text-align: center; font-weight: 600; font-size: 2.4rem;
+
+            text-align: center; font-weight: 600; font-size: 2.2rem;
+
             color: #9b6b43; text-shadow: 4px 4px 0 #fce2c1;
+
             letter-spacing: 2px; margin: -8px 0 16px;
+
             display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+
         }
+
         h1 span {
+
             background: #ffb882; padding: 6px 20px; border-radius: 60px;
-            font-size: 1.2rem; color: white; text-shadow: none; box-shadow: inset 0 -2px 0 #b56f3a;
+
+            font-size: 1.1rem; color: white; text-shadow: none; box-shadow: inset 0 -2px 0 #b56f3a;
+
         }
-        .rabbits-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+
+        
+
+        /* 1. 卡通化重新绘制的切换按钮 */
+
+        .switcher-container {
+
+            display: flex; justify-content: center; margin-bottom: 24px;
+
+        }
+
+        .switch-btn {
+
+            background: #FFDAB9; /* 温暖的桃色背景 */
+
+            border: 4px solid #8B4513; /* 棕色粗描边 */
+
+            color: #8B4513;
+
+            font-size: 1.3rem; 
+
+            font-weight: 900; 
+
+            padding: 12px 32px;
+
+            border-radius: 25px 15px 25px 15px; /* 不规则膨胀感圆角 */
+
+            cursor: pointer;
+
+            box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), /* 内部顶部高光 */
+
+                        0 8px 0 #D2691E,                     /* 底部厚重阴影 */
+
+                        0 12px 20px rgba(139,69,19,0.3);     /* 外部投影 */
+
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+            display: flex; align-items: center; gap: 10px;
+
+            text-shadow: 1px 1px 0 #FFF;
+
+        }
+
+        .switch-btn:active {
+
+            transform: translateY(6px); /* 按下幅度更大 */
+
+            box-shadow: inset 0 4px 0 rgba(255,255,255,0.5),
+
+                        0 2px 0 #D2691E,
+
+                        0 4px 10px rgba(139,69,19,0.2);
+
+        }
+
+
+
+        .single-rabbit-wrapper {
+
+            display: flex; justify-content: center; width: 100%;
+
+        }
+
         .rabbit-card {
-            flex: 1 1 320px; min-width: 280px; background: #fffaf2;
-            border-radius: 60px 60px 40px 40px; padding: 20px 16px 20px;
+
+            max-width: 420px; width: 100%; background: #fffaf2;
+
+            border-radius: 60px 60px 40px 40px; padding: 24px 20px 20px;
+
             box-shadow: 0 12px 0 #d4a373, 0 8px 20px rgba(0,0,0,0.08);
+
             border: 3px solid #ffe0b9; display: flex; flex-direction: column; align-items: center; position: relative;
+
         }
+
+        
+
         .owner-tag {
-            position: absolute; top: 18px; left: 20px; background: #ffdbb5;
-            padding: 6px 16px; border-radius: 40px; font-weight: bold;
-            color: #6b3f1a; font-size: 1.1rem; box-shadow: inset 0 -2px 0 #b28b65; border: 1px solid #f3c89d; z-index: 5;
+
+            background: #ffdbb5; padding: 6px 18px; border-radius: 40px; font-weight: bold;
+
+            color: #6b3f1a; font-size: 1.2rem; box-shadow: inset 0 -2px 0 #b28b65; 
+
+            border: 1px solid #f3c89d; margin-bottom: 8px; /* 减小间距 */
+
         }
+
+        
+
         .level-badge {
+
             background: #b08968; padding: 8px 22px; border-radius: 40px; color: white;
+
             font-weight: bold; font-size: 1.5rem; letter-spacing: 2px;
+
             box-shadow: inset 0 -4px 0 #6b4f3a, 0 4px 0 #6b4f3a; margin-bottom: 10px; border: 2px solid #f7d5aa;
+
         }
+
         canvas {
-            display: block; margin: 0 auto; width: 100%; max-width: 260px;
+
+            display: block; margin: 0 auto; width: 100%; max-width: 320px; /* 画布稍微放大适应大草地 */
+
             aspect-ratio: 1/1; filter: drop-shadow(0 8px 10px rgba(120,60,20,0.15)); cursor: pointer; border-radius: 30px;
+
         }
+
         .bubble {
+
             background: white; padding: 12px 18px; border-radius: 40px 40px 40px 12px;
+
             box-shadow: 0 6px 0 #e4c2a2, 0 4px 8px rgba(0,0,0,0.05);
-            font-size: 1.2rem; font-weight: 600; color: #6b4226; margin: 12px 0 8px; border: 2px solid #fbc4ab;
+
+            font-size: 1.2rem; font-weight: 600; color: #6b4226; margin: 16px 0 10px; border: 2px solid #fbc4ab;
+
             min-height: 64px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%;
+
         }
-        .points-panel { display: flex; align-items: center; justify-content: space-between; background: #fbeed9; width: 100%; padding: 10px 16px; border-radius: 50px; margin: 6px 0; border: 2px solid #e6bf9a; }
+
+        .points-panel { display: flex; align-items: center; justify-content: space-between; background: #fbeed9; width: 100%; padding: 12px 16px; border-radius: 50px; margin: 6px 0; border: 2px solid #e6bf9a; }
+
         .points-value { font-size: 1.9rem; font-weight: 700; color: #a15813; background: #fff1e0; padding: 0 14px; border-radius: 30px; border: 2px solid #e6a56f; }
+
         .feed-info { display: flex; gap: 10px; width: 100%; margin: 8px 0; }
-        .progress-carrot { background: #f2d5b5; border-radius: 30px; padding: 6px 12px; flex: 2; display: flex; align-items: center; gap: 6px; font-weight: bold; color: #6b3e1a; border: 2px dashed #b58a6a; }
+
+        .progress-carrot { background: #f2d5b5; border-radius: 30px; padding: 6px 12px; flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; color: #6b3e1a; border: 2px dashed #b58a6a; font-size:1.1rem; }
+
         .feed-btn {
+
             background: #ff9f4b; border: none; border-bottom: 5px solid #b45f1a; color: white;
-            font-weight: bold; font-size: 1.3rem; padding: 8px 16px; border-radius: 40px;
-            cursor: pointer; box-shadow: 0 4px 0 #b45f1a; transition: all 0.05s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: 2px solid #ffcd94;
+
+            font-weight: bold; font-size: 1.4rem; padding: 8px 16px; border-radius: 40px;
+
+            cursor: pointer; box-shadow: 0 4px 0 #b45f1a; transition: all 0.05s; flex: 1.5; display: flex; align-items: center; justify-content: center; gap: 6px; border: 2px solid #ffcd94;
+
         }
+
         .feed-btn:active { transform: translateY(4px); box-shadow: none; }
+
         .feed-btn:disabled { opacity: 0.5; transform: none; box-shadow: 0 4px 0 #b45f1a; cursor: not-allowed; background: #bc9a7c; }
+
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin: 28px 0 12px; flex-wrap: wrap; }
+
         .date-display { font-size: 1.2rem; background: #f0d5b0; padding: 8px 18px; border-radius: 40px; font-weight: 600; }
+
         .action-btn { background: #dbb68c; border: none; border-bottom: 5px solid #8f6a4c; padding: 12px 28px; border-radius: 60px; font-weight: bold; font-size: 1.2rem; color: #2d1f12; box-shadow: 0 4px 0 #8f6a4c; cursor: pointer; border: 2px solid #f7e1c1; }
+
         .parent-section { background: #edd6be; margin-top: 24px; padding: 18px 20px; border-radius: 48px; border: 3px solid #bb8f6e; }
+
         .parent-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
         .password-area { display: flex; gap: 8px; }
+
         .password-input { padding: 10px 16px; border-radius: 40px; border: 2px solid #a5835e; background: #fff7e7; width: 140px; }
+
         .unlock-btn, .lock-btn { background: #7f5e42; color: white; border: none; border-bottom: 4px solid #4d3624; padding: 8px 20px; border-radius: 40px; font-weight: bold; cursor: pointer; }
+
         .lock-btn { background: #9e7b61; }
+
         .points-setter { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 16px; }
+
         .setter-item input { width: 100px; padding: 8px 12px; border-radius: 30px; border: 2px solid #cb9f7a; text-align: center; }
+
         .record-panel { margin: 20px 0 10px; background: #ffe5d0; border-radius: 30px; padding: 14px 18px; border: 2px solid #dbb58b; }
+
         .record-list { max-height: 150px; overflow-y: auto; background: #fff7ef; border-radius: 20px; padding: 8px 12px; font-size: 0.9rem; border: 1px solid #c8aa8a; }
+
         .record-item { padding: 4px 0; border-bottom: 1px dashed #d4b59d; }
+
         .footer-note { text-align: center; margin-top: 12px; color: #9b7653; }
+
     </style>
+
 </head>
+
 <body>
+
 <div class="game-container">
-    <h1>🥕 双兔养成记 <span>每日5根·升级变大</span></h1>
-    <div class="rabbits-row">
-        <div class="rabbit-card">
-            <div class="owner-tag">🐰 萧沐然的宠物兔</div>
-            <div class="level-badge" id="pinkLevel">Lv.1.0</div>
-            <canvas id="pinkCanvas" width="300" height="300"></canvas>
-            <div class="bubble" id="pinkBubble">🐰 好饿呀~</div>
-            <div class="points-panel">
-                <span class="carrot-icon">🥕</span>
-                <span class="points-value" id="pinkPoints">20</span><span>积分</span>
-            </div>
-            <div class="feed-info">
-                <div class="progress-carrot"><span>🥕</span> <span id="pinkFeedCount">0</span>/5</div>
-                <button class="feed-btn" id="pinkFeedBtn">🥕 喂食</button>
-            </div>
-        </div>
-        <div class="rabbit-card">
-            <div class="owner-tag">🐇 萧宁的宠物兔</div>
-            <div class="level-badge" id="whiteLevel">Lv.1.0</div>
-            <canvas id="whiteCanvas" width="300" height="300"></canvas>
-            <div class="bubble" id="whiteBubble">🐇 好饿呀~</div>
-            <div class="points-panel">
-                <span class="carrot-icon">🥕</span>
-                <span class="points-value" id="whitePoints">20</span><span>积分</span>
-            </div>
-            <div class="feed-info">
-                <div class="progress-carrot"><span>🥕</span> <span id="whiteFeedCount">0</span>/5</div>
-                <button class="feed-btn" id="whiteFeedBtn">🥕 喂食</button>
-            </div>
-        </div>
+
+    <h1>🥕 双兔养成乐园 <span>喂满5根·升级变大</span></h1>
+
+    
+
+    <div class="switcher-container">
+
+        <button class="switch-btn" id="switchRabbitBtn"> 切换至：萧宁的白兔 🐇</button>
+
     </div>
+
+
+
+    <div class="single-rabbit-wrapper">
+
+        <div class="rabbit-card">
+
+            <div class="owner-tag" id="mainOwnerTag">🐰 萧沐然的宠物兔</div>
+
+            <div class="level-badge" id="mainLevel">Lv.1.0</div>
+
+            
+
+            <canvas id="pinkCanvas" width="360" height="360" style="display:block;"></canvas>
+
+            <canvas id="whiteCanvas" width="360" height="360" style="display:none;"></canvas>
+
+            
+
+            <div class="bubble" id="mainBubble">🐰 好饿呀~</div>
+
+            <div class="points-panel">
+
+                <span class="carrot-icon" style="font-size: 1.5rem;">🥕</span>
+
+                <span class="points-value" id="mainPoints">20</span><span style="font-weight: bold; color: #8e541a;">剩余积分</span>
+
+            </div>
+
+            <div class="feed-info">
+
+                <div class="progress-carrot"><span>进阶进度</span> <span id="mainFeedCount">0</span>/5</div>
+
+                <button class="feed-btn" id="mainFeedBtn">🥕 喂食</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
 
     <div class="record-panel">
-        <div class="record-title">📋 全部喂食记录 <span style="margin-left:auto; font-size:0.9rem; cursor:pointer;" id="clearRecordsBtn">🗑️ 清空</span></div>
+
+        <div class="record-title" style="font-weight:bold; color:#8f501b; margin-bottom: 8px;">📋 全部喂食记录 <span style="margin-left:auto; font-size:0.9rem; cursor:pointer; font-weight:normal;" id="clearRecordsBtn">🗑️ 清空</span></div>
+
         <div class="record-list" id="feedRecordList"></div>
+
     </div>
+
+
 
     <div class="action-bar">
+
         <div class="date-display" id="currentDate"></div>
-        <button class="action-btn" id="newDayBtn">🌞 新的一天</button>
+
+        <button class="action-btn" id="newDayBtn">🌞 新的一天 (叫醒)</button>
+
     </div>
+
+
 
     <div class="parent-section">
+
         <div class="parent-header">
+
             <span style="font-size:1.8rem;">🔐</span><span style="font-weight:700;">家长模式 · 积分管理</span>
+
             <div class="password-area">
+
                 <input type="password" id="passwordInput" class="password-input" maxlength="6">
+
                 <button class="unlock-btn" id="unlockParentBtn">验证</button>
+
                 <button class="lock-btn" id="lockParentBtn" style="display:none;">🔒 锁定</button>
+
             </div>
+
             <span id="authStatus">🔒 未解锁</span>
+
         </div>
+
         <div id="parentControls" style="display:none;">
+
             <div class="points-setter">
+
                 <div class="setter-item">🐰粉兔积分:<input type="number" id="pinkPointsInput" min="0" value="20"></div>
+
                 <div class="setter-item">🐇白兔积分:<input type="number" id="whitePointsInput" min="0" value="20"></div>
-                <button class="apply-btn" id="applyPointsBtn" style="padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">应用积分</button>
+
+                <button class="apply-btn" id="applyPointsBtn" style="padding: 8px 16px; border-radius: 20px; background: #6dbf73; color: white; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #4a8f4f;">✅ 应用积分</button>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
+
+
 <script>
+
 (function(){
+
     "use strict";
+
     const PARENT_PASSWORD = "336699";
+
     const MAX_LEVEL = 50;
+
     const CARROTS_PER_MINOR = 5;
-    const STORAGE_KEY = 'double_rabbit_save_final';
+
+    const STORAGE_KEY = 'double_rabbit_save_final_v4'; 
+
+
+
+    let activeRabbitIdx = 0;
+
+
 
     let audioCtx = null;
+
     function initAudio() {
+
         if (audioCtx) return audioCtx;
+
         try {
+
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
             if (audioCtx.state === 'suspended') audioCtx.resume();
+
         } catch(e) { console.warn("音频不支持"); }
+
         return audioCtx;
+
     }
+
+
 
     function playEatSound() {
+
         const ctx = initAudio(); if(!ctx) return;
+
         if(ctx.state==='suspended') ctx.resume();
+
         const now = ctx.currentTime;
+
         for(let i=0; i<3; i++){
+
             const osc = ctx.createOscillator();
+
             const gain = ctx.createGain();
+
             osc.type = 'triangle';
+
             osc.frequency.value = 800 + i*200;
+
             gain.gain.setValueAtTime(0.12, now+i*0.05);
+
             gain.gain.exponentialRampToValueAtTime(0.01, now+i*0.05+0.1);
+
             osc.connect(gain).connect(ctx.destination);
+
             osc.start(now+i*0.05);
+
             osc.stop(now+i*0.05+0.1);
+
         }
+
     }
+
+
 
     let rabbits = [
+
         { id: 'pink', owner: '萧沐然', color: '#FFEBF0', levelMajor:1, levelMinor:0, points:20, feedCount:0, isSleeping:false, earWiggle:0, blink:0, eatAnim:0, tailWagAnim:0 },
+
         { id: 'white', owner: '萧宁', color: '#FFFFFF', levelMajor:1, levelMinor:0, points:20, feedCount:0, isSleeping:false, earWiggle:0, blink:0, eatAnim:0, tailWagAnim:0 }
+
     ];
 
+
+
     let feedRecords = [];
+
     let parentUnlocked = false;
 
+
+
     const pinkCanvas = document.getElementById('pinkCanvas');
+
     const whiteCanvas = document.getElementById('whiteCanvas');
-    const pinkLevel = document.getElementById('pinkLevel');
-    const whiteLevel = document.getElementById('whiteLevel');
-    const pinkPoints = document.getElementById('pinkPoints');
-    const whitePoints = document.getElementById('whitePoints');
-    const pinkFeedCount = document.getElementById('pinkFeedCount');
-    const whiteFeedCount = document.getElementById('whiteFeedCount');
-    const pinkBubble = document.getElementById('pinkBubble');
-    const whiteBubble = document.getElementById('whiteBubble');
-    const pinkFeedBtn = document.getElementById('pinkFeedBtn');
-    const whiteFeedBtn = document.getElementById('whiteFeedBtn');
+
+    const mainOwnerTag = document.getElementById('mainOwnerTag');
+
+    const mainLevel = document.getElementById('mainLevel');
+
+    const mainPoints = document.getElementById('mainPoints');
+
+    const mainFeedCount = document.getElementById('mainFeedCount');
+
+    const mainBubble = document.getElementById('mainBubble');
+
+    const mainFeedBtn = document.getElementById('mainFeedBtn');
+
+    const switchRabbitBtn = document.getElementById('switchRabbitBtn');
+
     const recordListEl = document.getElementById('feedRecordList');
 
+
+
     function updateDateDisplay() {
+
         const d = new Date();
+
         document.getElementById('currentDate').textContent = `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}`;
+
     }
+
+
 
     function formatTime() {
+
         const d = new Date();
+
         return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+
     }
+
     
+
     function addRecord(text) {
+
         feedRecords.push(`[${formatTime()}] ${text}`);
+
         if(feedRecords.length>200) feedRecords.shift();
+
         renderRecords();
+
         saveToStorage();
+
     }
+
     
+
     function renderRecords() {
+
         if(feedRecords.length===0) recordListEl.innerHTML = '<div class="record-item">✨ 暂无记录</div>';
+
         else recordListEl.innerHTML = feedRecords.map(r=>`<div class="record-item">${r}</div>`).join('');
+
         recordListEl.scrollTop = recordListEl.scrollHeight;
+
     }
+
+
 
     function updateUI() {
-        rabbits.forEach((r,i)=>{
-            const isPink = i===0;
-            const levelEl = isPink?pinkLevel:whiteLevel;
-            const ptsEl = isPink?pinkPoints:whitePoints;
-            const cntEl = isPink?pinkFeedCount:whiteFeedCount;
-            const bubble = isPink?pinkBubble:whiteBubble;
-            const btn = isPink?pinkFeedBtn:whiteFeedBtn;
-            
-            levelEl.innerText = `Lv.${r.levelMajor}.${r.levelMinor}`;
-            ptsEl.innerText = r.points;
-            cntEl.innerText = r.feedCount;
-            
-            if(r.isSleeping) { bubble.innerHTML = '😴💤 吃饱睡觉中...'; btn.disabled = true; }
-            else if(r.eatAnim > 0) { bubble.innerHTML = '😋 吧唧吧唧...'; btn.disabled = true; }
-            else {
-                if(r.feedCount<CARROTS_PER_MINOR) bubble.innerHTML = '🥕 好饿好饿~ 快喂我!';
-                else bubble.innerHTML = '😋 吃饱啦，想睡觉...';
-                btn.disabled = (r.points<1 || r.feedCount>=CARROTS_PER_MINOR);
-            }
-            if(!r.isSleeping && r.points<1 && r.eatAnim <= 0) { btn.disabled = true; bubble.innerHTML = '😢 没有积分了...'; }
-        });
+
+        const r = rabbits[activeRabbitIdx];
+
+        const isPink = (activeRabbitIdx === 0);
+
+
+
+        pinkCanvas.style.display = isPink ? 'block' : 'none';
+
+        whiteCanvas.style.display = !isPink ? 'block' : 'none';
+
+
+
+        switchRabbitBtn.innerHTML = isPink ? ' 切换至：萧宁的白兔 🐇' : ' 切换至：萧沐然的粉兔 🐰';
+
+        mainOwnerTag.innerText = isPink ? '🐰 萧沐然的宠物兔' : '🐇 萧宁的宠物兔';
+
+        mainLevel.innerText = `Lv.${r.levelMajor}.${r.levelMinor}`;
+
+        mainPoints.innerText = r.points;
+
+        mainFeedCount.innerText = r.feedCount;
+
+
+
+        if(r.isSleeping) { 
+
+            mainBubble.innerHTML = '😴💤 吃饱睡觉中...等明天吧~'; 
+
+            mainFeedBtn.disabled = true; 
+
+        }
+
+        else if(r.eatAnim > 0) { 
+
+            mainBubble.innerHTML = '😋 吧唧吧唧...'; 
+
+            mainFeedBtn.disabled = true; 
+
+        }
+
+        else {
+
+            if(r.feedCount < CARROTS_PER_MINOR) mainBubble.innerHTML = '🥕 好饿好饿~ 快喂我!';
+
+            else mainBubble.innerHTML = '😋 吃饱啦，想睡觉...';
+
+            mainFeedBtn.disabled = (r.points < 1 || r.feedCount >= CARROTS_PER_MINOR);
+
+        }
+
+        if(!r.isSleeping && r.points < 1 && r.eatAnim <= 0) { 
+
+            mainFeedBtn.disabled = true; 
+
+            mainBubble.innerHTML = '😢 主人，没有积分了...'; 
+
+        }
+
     }
+
+
+
+    switchRabbitBtn.addEventListener('click', () => {
+
+        activeRabbitIdx = (activeRabbitIdx === 0) ? 1 : 0;
+
+        updateUI();
+
+    });
+
+
+
+    mainFeedBtn.addEventListener('click', () => {
+
+        feedRabbit(activeRabbitIdx);
+
+    });
+
+
 
     function fillAndStroke(ctx, fillStyle) {
+
         ctx.fillStyle = fillStyle;
+
         ctx.fill();
+
         ctx.stroke();
+
     }
+
+
 
     function drawRabbit(rabbit, canvas) {
+
         const ctx = canvas.getContext('2d');
-        const w=300, h=300;
+
+        const w=360, h=360; // 调整宽高适应大草地
+
+        const now = Date.now();
+
         ctx.clearRect(0,0,w,h);
+
         
+
         const major = rabbit.levelMajor;
+
         let scale = 1.0 + Math.min(major * 0.005, 0.3); 
+
         
+
         const cx=w/2, cy=h/2;
-        ctx.save();
-        ctx.translate(cx,cy);
-        ctx.scale(scale,scale);
+
         
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#000';
-        
-        // 1. 画耳朵
-        const earWig = rabbit.earWiggle;
+
+        // ==========================================
+
+        // 1. 全新：波浪形不规则大草地背景
+
+        // ==========================================
+
         ctx.save();
-        ctx.rotate(-0.15 + earWig);
-        ctx.beginPath(); ctx.ellipse(-25, -95, 14, 45, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
-        ctx.beginPath(); ctx.ellipse(-25, -95, 6, 30, 0, 0, Math.PI*2); ctx.fillStyle = '#FFB6C1'; ctx.fill();
-        ctx.restore();
+
+        ctx.translate(cx, cy + 85); // 草地整体位置偏下
+
         
-        ctx.save();
-        ctx.rotate(0.15 - earWig);
-        ctx.beginPath(); ctx.ellipse(25, -95, 14, 45, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
-        ctx.beginPath(); ctx.ellipse(25, -95, 6, 30, 0, 0, Math.PI*2); ctx.fillStyle = '#FFB6C1'; ctx.fill();
+
+        // 绘制阴影层 (波浪边缘)
+
+        ctx.fillStyle = 'rgba(118, 215, 196, 0.4)';
+
+        ctx.beginPath();
+
+        ctx.moveTo(-160, 0);
+
+        ctx.quadraticCurveTo(-80, -20, 0, 5);
+
+        ctx.quadraticCurveTo(80, 20, 150, -5);
+
+        ctx.quadraticCurveTo(170, 30, 120, 45);
+
+        ctx.quadraticCurveTo(0, 55, -140, 35);
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+
+        // 绘制草地主层 (波浪边缘，面积增大)
+
+        ctx.fillStyle = '#A3E4D7';
+
+        ctx.beginPath();
+
+        ctx.moveTo(-170, -10);
+
+        ctx.quadraticCurveTo(-100, -35, -20, -15);
+
+        ctx.quadraticCurveTo(60, 5, 160, -20);
+
+        ctx.quadraticCurveTo(180, 25, 130, 35);
+
+        ctx.quadraticCurveTo(0, 45, -150, 25);
+
+        ctx.closePath();
+
+        ctx.fill();
+
         ctx.restore();
 
-        // 2. 画摇摆的尾巴
-        let tailY = 50;
-        if(rabbit.tailWagAnim > 0) {
-            tailY += Math.sin(rabbit.tailWagAnim * 30) * 6;
+
+
+        // --- 小花动画 (位置适应新草地) ---
+
+        ctx.save();
+
+        ctx.translate(cx, cy);
+
+        const flowers = [
+
+            {x: -120, y: 70, color: '#FFB6C1', scale: 0.8},
+
+            {x: -70, y: 105, color: '#FFFACD', scale: 0.9},
+
+            {x: 80, y: 110, color: '#E6E6FA', scale: 1.1},
+
+            {x: 130, y: 65, color: '#FFDAB9', scale: 0.75}
+
+        ];
+
+        flowers.forEach((f, index) => {
+
+            ctx.save();
+
+            ctx.translate(f.x, f.y);
+
+            ctx.rotate(Math.sin(now / 800 + index * 2) * 0.2); 
+
+            ctx.scale(f.scale, f.scale);
+
+            
+
+            ctx.strokeStyle = '#2ECC71'; ctx.lineWidth = 3;
+
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 15); ctx.stroke();
+
+            
+
+            ctx.fillStyle = '#2ECC71';
+
+            ctx.beginPath(); ctx.ellipse(-4, 8, 3, 6, -0.5, 0, Math.PI*2); ctx.fill();
+
+            ctx.beginPath(); ctx.ellipse(4, 10, 3, 6, 0.5, 0, Math.PI*2); ctx.fill();
+
+            
+
+            ctx.fillStyle = f.color;
+
+            for(let p = 0; p < 5; p++) {
+
+                ctx.beginPath();
+
+                ctx.ellipse(0, -6, 4, 8, (Math.PI*2/5) * p, 0, Math.PI*2);
+
+                ctx.fill();
+
+            }
+
+            ctx.fillStyle = '#FFD700';
+
+            ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI*2); ctx.fill();
+
+            ctx.restore();
+
+        });
+
+
+
+        // --- 蝴蝶动画 (扩大飞行范围) ---
+
+        const butterflies = 2;
+
+        for(let i = 0; i < butterflies; i++) {
+
+            let offset = i * 15 + (rabbit.id === 'pink' ? 0 : 10);
+
+            let bx = Math.sin(now / 1500 + offset) * 140; // 扩大X范围
+
+            let by = -20 + Math.cos(now / 1200 + offset) * 80;
+
+            
+
+            ctx.save();
+
+            ctx.translate(bx, by);
+
+            ctx.rotate(Math.cos(now / 1500 + offset) * 0.3);
+
+            
+
+            let flap = Math.abs(Math.sin(now / 150 + offset));
+
+            ctx.fillStyle = (i % 2 === 0) ? '#85C1E9' : '#F1948A'; 
+
+            
+
+            ctx.beginPath(); ctx.ellipse(-6 * flap, -2, 7 * flap, 10, -0.3, 0, Math.PI*2); ctx.fill();
+
+            ctx.beginPath(); ctx.ellipse(-4 * flap, 8, 5 * flap, 8, -0.6, 0, Math.PI*2); ctx.fill();
+
+            ctx.beginPath(); ctx.ellipse(6 * flap, -2, 7 * flap, 10, 0.3, 0, Math.PI*2); ctx.fill();
+
+            ctx.beginPath(); ctx.ellipse(4 * flap, 8, 5 * flap, 8, 0.6, 0, Math.PI*2); ctx.fill();
+
+            
+
+            ctx.fillStyle = '#5D6D7E';
+
+            ctx.beginPath(); ctx.ellipse(0, 3, 2, 8, 0, 0, Math.PI*2); ctx.fill();
+
+            ctx.restore();
+
         }
+
+        ctx.restore();
+
+
+
+        // ==========================================
+
+        // 2. 兔子主体 (坐标居中缩放)
+
+        // ==========================================
+
+        ctx.save();
+
+        ctx.translate(cx, cy);
+
+        ctx.scale(scale, scale);
+
+        ctx.lineWidth = 4;
+
+        ctx.strokeStyle = '#000';
+
+        
+
+        const earWig = rabbit.earWiggle;
+
+        ctx.save();
+
+        ctx.rotate(-0.15 + earWig);
+
+        ctx.beginPath(); ctx.ellipse(-25, -95, 14, 45, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
+        ctx.beginPath(); ctx.ellipse(-25, -95, 6, 30, 0, 0, Math.PI*2); ctx.fillStyle = '#FFB6C1'; ctx.fill();
+
+        ctx.restore();
+
+        
+
+        ctx.save();
+
+        ctx.rotate(0.15 - earWig);
+
+        ctx.beginPath(); ctx.ellipse(25, -95, 14, 45, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
+        ctx.beginPath(); ctx.ellipse(25, -95, 6, 30, 0, 0, Math.PI*2); ctx.fillStyle = '#FFB6C1'; ctx.fill();
+
+        ctx.restore();
+
+
+
+        let tailY = 50;
+
+        if(rabbit.tailWagAnim > 0) {
+
+            tailY += Math.sin(rabbit.tailWagAnim * 30) * 6;
+
+        }
+
         ctx.beginPath(); ctx.arc(-48, tailY, 12, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
 
-        // 3. 画身体和脚丫
+
+
         ctx.beginPath(); ctx.ellipse(0, 35, 50, 55, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
         
+
         ctx.beginPath(); ctx.ellipse(-25, 85, 16, 10, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
         ctx.beginPath(); ctx.ellipse(25, 85, 16, 10, 0, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
         ctx.beginPath(); ctx.moveTo(-30, 95); ctx.lineTo(-28, 85); ctx.stroke();
+
         ctx.beginPath(); ctx.moveTo(-20, 95); ctx.lineTo(-18, 85); ctx.stroke();
+
         ctx.beginPath(); ctx.moveTo(30, 95); ctx.lineTo(28, 85); ctx.stroke();
+
         ctx.beginPath(); ctx.moveTo(20, 95); ctx.lineTo(18, 85); ctx.stroke();
 
-        // 4. 画大头
+
+
         ctx.beginPath();
+
         ctx.ellipse(0, -35, 65, 55, 0, 0, Math.PI*2);
+
         fillAndStroke(ctx, rabbit.color);
 
+
+
         ctx.fillStyle = '#FFB6C1';
+
         ctx.globalAlpha = 0.5;
+
         ctx.beginPath(); ctx.arc(-42, -25, 12, 0, Math.PI*2); ctx.fill();
+
         ctx.beginPath(); ctx.arc(42, -25, 12, 0, Math.PI*2); ctx.fill();
+
         ctx.globalAlpha = 1.0;
 
+
+
         if(rabbit.isSleeping) {
+
             ctx.beginPath(); ctx.moveTo(-35, -35); ctx.lineTo(-15, -35); ctx.stroke();
+
             ctx.beginPath(); ctx.moveTo(15, -35); ctx.lineTo(35, -35); ctx.stroke();
+
             ctx.beginPath(); ctx.arc(0, -20, 2, 0, Math.PI*2); ctx.fillStyle='#000'; ctx.fill();
+
             ctx.font = "bold 20px Arial"; ctx.fillStyle = '#555'; ctx.fillText("Zzz", 45, -60);
+
         } else {
+
             const blink = rabbit.blink > 0.5 ? 0.2 : 1;
+
             ctx.fillStyle = '#000';
+
             ctx.beginPath(); ctx.ellipse(-25, -35, 11, 14 * blink, 0, 0, Math.PI*2); ctx.fill();
+
             ctx.beginPath(); ctx.ellipse(25, -35, 11, 14 * blink, 0, 0, Math.PI*2); ctx.fill();
+
             
+
             if(blink > 0.5) {
+
                 ctx.fillStyle = '#FFF';
+
                 ctx.beginPath(); ctx.arc(-28, -40, 4, 0, Math.PI*2); ctx.fill();
+
                 ctx.beginPath(); ctx.arc(-22, -30, 2, 0, Math.PI*2); ctx.fill();
+
                 ctx.beginPath(); ctx.arc(22, -40, 4, 0, Math.PI*2); ctx.fill();
+
                 ctx.beginPath(); ctx.arc(28, -30, 2, 0, Math.PI*2); ctx.fill();
+
             }
+
             
+
             ctx.beginPath(); ctx.arc(0, -22, 2.5, 0, Math.PI*2); ctx.fillStyle='#000'; ctx.fill();
+
             ctx.beginPath(); ctx.arc(-4, -18, 4, 0, Math.PI); ctx.stroke();
+
             ctx.beginPath(); ctx.arc(4, -18, 4, 0, Math.PI); ctx.stroke();
+
             
+
             if(rabbit.eatAnim > 0 && Math.sin(rabbit.eatAnim * 20) > 0) {
+
                 ctx.beginPath(); ctx.arc(0, -18, 4, 0, Math.PI*2); ctx.fillStyle='#000'; ctx.fill();
+
             }
+
         }
 
-        // 5. 画胡萝卜
+
+
         let drawCarrotNow = !rabbit.isSleeping && rabbit.feedCount < CARROTS_PER_MINOR;
+
         if (drawCarrotNow || rabbit.eatAnim > 0) {
+
             ctx.save();
+
             if(rabbit.eatAnim > 0) {
+
                 const progress = 1 - rabbit.eatAnim;
+
                 ctx.translate(0, 30 - progress * 48);
+
                 ctx.scale(1 - progress*0.8, 1 - progress*0.8);
+
             } else {
+
                 ctx.translate(0, 30);
+
             }
+
             
+
             ctx.fillStyle = '#4CAF50';
+
             ctx.beginPath(); ctx.ellipse(0, -25, 6, 12, 0, 0, Math.PI*2); fillAndStroke(ctx, '#4CAF50');
+
             ctx.beginPath(); ctx.ellipse(-8, -20, 5, 10, -0.6, 0, Math.PI*2); fillAndStroke(ctx, '#4CAF50');
+
             ctx.beginPath(); ctx.ellipse(8, -20, 5, 10, 0.6, 0, Math.PI*2); fillAndStroke(ctx, '#4CAF50');
+
             
+
             ctx.beginPath();
+
             ctx.moveTo(-10, -10);
+
             ctx.quadraticCurveTo(0, -15, 10, -10);
+
             ctx.lineTo(3, 25);
+
             ctx.quadraticCurveTo(0, 30, -3, 25);
+
             ctx.closePath();
+
             fillAndStroke(ctx, '#FF9800');
+
             
+
             ctx.beginPath(); ctx.moveTo(-7, -2); ctx.lineTo(3, 0); ctx.stroke();
+
             ctx.beginPath(); ctx.moveTo(-5, 8); ctx.lineTo(5, 10); ctx.stroke();
+
             ctx.beginPath(); ctx.moveTo(-2, 18); ctx.lineTo(3, 19); ctx.stroke();
+
             
+
             ctx.restore();
+
         }
 
-        // 6. 画小手 (修改这里：让手跟着动)
+
+
         let handY = 20;
+
         let handX = 22;
+
         if(rabbit.eatAnim > 0) {
+
             const progress = 1 - rabbit.eatAnim;
-            // 手跟着胡萝卜上移，并加入轻微上下咀嚼抖动
+
             handY = 20 - progress * 35 + (Math.sin(rabbit.eatAnim * 30) * 2);
-            // 手稍微向胸口收拢
+
             handX = 22 - progress * 4;
+
         }
+
         
+
         ctx.beginPath(); ctx.ellipse(-handX, handY, 12, 16, -0.4, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
+
         ctx.beginPath(); ctx.ellipse(handX, handY, 12, 16, 0.4, 0, Math.PI*2); fillAndStroke(ctx, rabbit.color);
-        // 手指细节，动态跟随 handX 和 handY
+
         ctx.beginPath(); ctx.moveTo(-handX + 7, handY); ctx.lineTo(-handX + 12, handY + 2); ctx.stroke();
+
         ctx.beginPath(); ctx.moveTo(handX - 7, handY); ctx.lineTo(handX - 12, handY + 2); ctx.stroke();
 
-        // 7. 新增：“谢谢主人！”感谢动效字体
+
+
         if(rabbit.eatAnim > 0) {
+
             const progress = 1 - rabbit.eatAnim;
+
             ctx.save();
-            ctx.globalAlpha = rabbit.eatAnim; // 随时间变透明
+
+            ctx.globalAlpha = rabbit.eatAnim; 
+
             
-            // 从右侧脸颊开始，向上和向右飘动
+
             ctx.translate(35 + progress * 15, -40 - progress * 40);
-            ctx.scale(1 + progress * 0.2, 1 + progress * 0.2); // 字体稍微放大
-            ctx.rotate(0.15); // 给字体加点可爱的倾角
+
+            ctx.scale(1 + progress * 0.2, 1 + progress * 0.2); 
+
+            ctx.rotate(0.15); 
+
             
-            // 可爱的圆润字体设置
+
             ctx.font = "bold 22px 'Quicksand', 'Microsoft YaHei', sans-serif";
+
             ctx.textAlign = "center";
+
             ctx.textBaseline = "middle";
+
             
-            // 先画白色粗描边，防止看不清
+
             ctx.lineWidth = 5;
+
             ctx.strokeStyle = "#FFFFFF";
+
             ctx.strokeText("✨谢谢主人!", 0, 0);
+
             
-            // 再画粉红色的文字主体
+
             ctx.fillStyle = "#FF6B81"; 
+
             ctx.fillText("✨谢谢主人!", 0, 0);
+
             
+
             ctx.restore();
+
         }
 
-        ctx.restore();
+
+
+        ctx.restore(); // 结束兔子主体形变
+
     }
+
+
 
     function redrawAll() {
+
         drawRabbit(rabbits[0], pinkCanvas);
+
         drawRabbit(rabbits[1], whiteCanvas);
+
     }
+
+
 
     let lastTime = Date.now();
+
     function animationLoop() {
+
         const now = Date.now();
+
         const delta = (now - lastTime) / 1000;
+
         lastTime = now;
 
+
+
         rabbits.forEach(r=>{
+
             if(!r.isSleeping && r.eatAnim <= 0) {
+
                 if(Math.random()<0.008) r.blink = 1.0;
+
                 else r.blink = Math.max(0, r.blink-0.1);
+
             }
+
             
+
             if(r.isSleeping) r.earWiggle = Math.sin(now/600)*0.1; 
+
             else r.earWiggle = 0;
 
+
+
             if(r.tailWagAnim > 0) {
+
                 r.tailWagAnim -= delta;
+
                 if(r.tailWagAnim < 0) r.tailWagAnim = 0;
+
             }
+
+
 
             if(r.eatAnim > 0) {
-                r.eatAnim -= delta * 0.6; // 稍微放慢一点点，让动效更清楚 
+
+                r.eatAnim -= delta * 0.6; 
+
                 if(r.eatAnim <= 0) {
+
                     r.eatAnim = 0;
+
                     checkLevelUp(r);
+
                     updateUI();
+
                     saveToStorage(); 
+
                 }
+
             }
+
         });
-        redrawAll();
+
+        redrawAll(); 
+
         requestAnimationFrame(animationLoop);
+
     }
+
     animationLoop();
 
+
+
     function checkLevelUp(r) {
+
         if(r.feedCount >= CARROTS_PER_MINOR){
+
             r.levelMinor++;
+
             if(r.levelMinor >= 10){ 
+
                 r.levelMinor = 0; 
+
                 r.levelMajor = Math.min(r.levelMajor+1, MAX_LEVEL); 
+
             }
+
             r.isSleeping = true;
+
             r.feedCount = 0;
-            addRecord(`🎉 ${r.owner}的兔兔升到 Lv.${r.levelMajor}.${r.levelMinor} 变大了一点并睡觉了`);
+
+            addRecord(`🎉 ${r.owner}的兔兔升到 Lv.${r.levelMajor}.${r.levelMinor} 并睡着了`);
+
         }
+
     }
+
+
 
     function feedRabbit(idx) {
+
         const r = rabbits[idx];
+
         if(r.isSleeping || r.points < 1 || r.eatAnim > 0) return;
+
         
+
         playEatSound();
+
         r.points--;
+
         r.feedCount++;
+
         r.eatAnim = 1.0; 
+
         
-        addRecord(`${r.owner} 喂了1根胡萝卜 (${r.feedCount}/${CARROTS_PER_MINOR})`);
+
+        addRecord(`${r.owner} 喂了1根胡萝卜 (进阶进度: ${r.feedCount}/${CARROTS_PER_MINOR})`);
+
         updateUI();
+
         saveToStorage();
+
     }
 
-    function newDay() {
-        rabbits.forEach(r=>{ r.isSleeping = false; r.feedCount = 0; r.eatAnim = 0; });
+
+
+    document.getElementById('newDayBtn').addEventListener('click', () => {
+
+        rabbits.forEach(r=>{ 
+
+            r.isSleeping = false; 
+
+            r.eatAnim = 0; 
+
+        });
+
         updateDateDisplay();
-        addRecord('🌞 新的一天开始啦，兔兔们醒了');
+
+        addRecord('🌞 新的一天开始啦，兔兔们醒了可以继续喂食咯~');
+
         updateUI();
+
         saveToStorage();
-    }
+
+    });
+
+
 
     function handlePet(idx) {
+
         const r = rabbits[idx];
-        const bubble = idx===0 ? pinkBubble : whiteBubble;
-        
+
         r.tailWagAnim = 1.5;
+
         
+
         if(r.eatAnim > 0) return;
+
         
+
         if(r.isSleeping) {
+
             r.earWiggle = 0.5; setTimeout(()=>r.earWiggle=0, 300);
-            bubble.innerHTML = '😊 (动动耳朵) 呼~';
+
+            mainBubble.innerHTML = '😊 (动动耳朵) 呼~';
+
         } else {
-            bubble.innerHTML = '✨ 贴贴~ 主人贴贴~';
+
+            mainBubble.innerHTML = '✨ 贴贴~ 主人贴贴~';
+
         }
+
         setTimeout(()=>updateUI(), 2000);
+
     }
+
     
+
     pinkCanvas.addEventListener('click', ()=>handlePet(0));
+
     whiteCanvas.addEventListener('click', ()=>handlePet(1));
 
+
+
     function saveToStorage() {
+
         const dataToSave = { rabbits: rabbits, feedRecords: feedRecords };
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+
     }
+
     
+
     function loadFromStorage() {
+
         const saved = localStorage.getItem(STORAGE_KEY);
+
         if(saved) {
+
             try {
+
                 const data = JSON.parse(saved);
+
                 if(data.rabbits) {
+
                     rabbits.forEach((r, i) => {
+
                         Object.assign(r, data.rabbits[i]);
+
                         r.eatAnim = 0; 
+
                         r.tailWagAnim = 0; 
+
                     });
+
                 }
+
                 if(data.feedRecords) feedRecords = data.feedRecords;
+
             } catch(e) {}
+
         }
+
         updateDateDisplay();
+
         renderRecords();
+
         updateUI();
+
     }
+
+
 
     document.getElementById('unlockParentBtn').addEventListener('click', ()=>{
+
         if(document.getElementById('passwordInput').value === PARENT_PASSWORD) {
+
             parentUnlocked = true;
+
             document.getElementById('parentControls').style.display = 'block';
+
             document.getElementById('lockParentBtn').style.display = 'inline-block';
+
             document.getElementById('authStatus').innerHTML = '🔓 已解锁';
+
             document.getElementById('pinkPointsInput').value = rabbits[0].points;
+
             document.getElementById('whitePointsInput').value = rabbits[1].points;
+
             addRecord('🔐 家长模式已解锁');
+
         } else alert('密码错误');
+
     });
+
     
+
     document.getElementById('lockParentBtn').addEventListener('click', ()=>{
+
         parentUnlocked = false;
+
         document.getElementById('parentControls').style.display = 'none';
+
         document.getElementById('lockParentBtn').style.display = 'none';
+
         document.getElementById('authStatus').innerHTML = '🔒 未解锁';
+
         document.getElementById('passwordInput').value = '';
+
         addRecord('🔒 家长模式已锁定');
+
     });
+
+
 
     document.getElementById('applyPointsBtn').addEventListener('click', ()=>{
+
         if(!parentUnlocked) return;
+
         let p = parseInt(document.getElementById('pinkPointsInput').value,10);
+
         let w = parseInt(document.getElementById('whitePointsInput').value,10);
+
         if(isNaN(p)||p<0)p=0; if(isNaN(w)||w<0)w=0;
+
         rabbits[0].points = p; rabbits[1].points = w;
+
         updateUI();
+
         addRecord(`✏️ 积分已修改: 粉兔${p} 白兔${w}`);
+
         saveToStorage();
+
     });
+
+
 
     document.getElementById('clearRecordsBtn').addEventListener('click', ()=>{
+
         feedRecords = []; renderRecords(); addRecord('📋 记录已清空'); saveToStorage(); 
+
     });
 
-    pinkFeedBtn.addEventListener('click', ()=>feedRabbit(0));
-    whiteFeedBtn.addEventListener('click', ()=>feedRabbit(1));
-    document.getElementById('newDayBtn').addEventListener('click', newDay);
+
 
     loadFromStorage();
+
 })();
+
 </script>
+
 </body>
+
 </html>
