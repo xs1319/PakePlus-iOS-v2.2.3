@@ -2,262 +2,66 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-  <title>沉井综合单价计价器</title>
-  <!-- 引入所需库 -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover, shrink-to-fit=no">
+  <title>沉井综合单价计算器</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
-    }
-    body {
-      background: #f5f9fe;
-      padding: 0 0 20px 0;
-      color: #1e2f3e;
-      min-height: 100vh;
-    }
-    .app-wrapper {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #ffffff;
-      box-shadow: 0 0 30px rgba(0,20,40,0.05);
-      min-height: 100vh;
-      border-radius: 0;
-      position: relative;
-    }
-    .header {
-      padding: 20px 20px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: white;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-    h1 {
-      font-weight: 500;
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-      color: #0f3b5e;
-      margin: 0;
-    }
-    .settings-icon {
-      font-size: 28px;
-      background: #eef3fa;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: 0.2s;
-      color: #1e5780;
-      border: 1px solid #cbdae6;
-    }
-    .input-section {
-      padding: 8px 16px 20px;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 18px 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.03);
-      border: 1px solid #e3eaf2;
-    }
-    .card h2 {
-      font-weight: 500;
-      font-size: 1.3rem;
-      margin: 0 0 16px 0;
-      color: #1e4460;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1.5px dashed #b8cee2;
-      padding-bottom: 10px;
-    }
-    .param-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 12px;
-    }
-    .input-item {
-      display: flex;
-      flex-direction: column;
-    }
-    .input-item label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #527a9b;
-      margin-bottom: 4px;
-      letter-spacing: 0.2px;
-    }
-    .input-item input {
-      background: #fafcff;
-      border: 1.5px solid #d3dfec;
-      border-radius: 18px;
-      padding: 12px 14px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #0b2a41;
-      outline: none;
-      transition: all 0.15s;
-    }
-    .input-item input:focus {
-      border-color: #2a7faa;
-      box-shadow: 0 0 0 3px rgba(42,127,170,0.1);
-      background: #ffffff;
-    }
-    .input-item input:disabled {
-      background: #eef2f7;
-      color: #6b8aa8;
-      border-color: #ccdae8;
-    }
-    .readonly-highlight input:disabled {
-      background: #e0ecf5;
-      color: #13415c;
-      font-weight: 600;
-    }
-    .result-section {
-      background: #f0f5fb;
-      border-radius: 32px 32px 0 0;
-      padding: 20px 18px 30px;
-      margin-top: 8px;
-      box-shadow: 0 -6px 14px rgba(47, 80, 120, 0.04);
-    }
-    .stats-badge {
-      background: #d9e6f2;
-      border-radius: 30px;
-      padding: 8px 20px;
-      display: inline-block;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .quantity-flex {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-    .q-item {
-      background: white;
-      border-radius: 40px;
-      padding: 10px 20px;
-      flex: 1 0 calc(50% - 10px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
-      border: 1px solid #d2e0ee;
-      display: flex;
-      justify-content: space-between;
-    }
-    .btn-calc {
-      background: #1a5f8d;
-      color: white;
-      border: none;
-      border-radius: 60px;
-      padding: 18px 20px;
-      font-size: 1.3rem;
-      font-weight: 600;
-      width: 100%;
-      margin: 12px 0 10px;
-      cursor: pointer;
-      box-shadow: 0 6px 14px rgba(26,86,129,0.2);
-    }
-    .settings-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: #f5f9fe;
-      z-index: 999;
-      transform: translateX(100%);
-      transition: transform 0.3s ease-in-out;
-      overflow-y: auto;
-      padding: 20px;
-    }
+    * { box-sizing: border-box; margin: 0; font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif; }
+    body { background: #f5f9fe; padding: 0; color: #1e2f3e; min-height: 100vh; width: 100%; overflow-x: hidden; position: relative; }
+    .app-wrapper { width: 100%; max-width: 100%; margin: 0 auto; background: #ffffff; min-height: 100vh; position: relative; overflow-x: hidden; }
+    .header { padding: 20px 20px 8px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; position: sticky; top: 0; z-index: 5; width: 100%; border-bottom: 1px solid #e9edf4; }
+    h1 { font-weight: 500; font-size: 1.8rem; letter-spacing: 1px; color: #0f3b5e; margin: 0; }
+    .settings-icon { font-size: 28px; background: #eef3fa; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 40px; cursor: pointer; transition: 0.2s; color: #1e5780; border: 1px solid #cbdae6; }
+    .input-section { padding: 8px 16px 20px; width: 100%; }
+    .card { background: #ffffff; border-radius: 24px; padding: 18px 18px; margin-bottom: 18px; box-shadow: 0 6px 16px rgba(0,0,0,0.03); border: 1px solid #e3eaf2; width: 100%; overflow: hidden; }
+    .card h2 { font-weight: 500; font-size: 1.3rem; margin: 0 0 16px 0; color: #1e4460; display: flex; align-items: center; gap: 8px; border-bottom: 1.5px dashed #b8cee2; padding-bottom: 10px; }
+    .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 12px; width: 100%; }
+    .input-item { display: flex; flex-direction: column; min-width: 0; }
+    .input-item label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #527a9b; margin-bottom: 4px; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .input-item input { background: #fafcff; border: 1.5px solid #d3dfec; border-radius: 18px; padding: 12px 14px; font-size: 0.95rem; font-weight: 500; color: #0b2a41; outline: none; transition: all 0.15s; width: 100%; min-width: 0; }
+    .input-item input:focus { border-color: #2a7faa; box-shadow: 0 0 0 3px rgba(42,127,170,0.1); background: #ffffff; }
+    .input-item input:disabled { background: #eef2f7; color: #6b8aa8; border-color: #ccdae8; }
+    .readonly-highlight input:disabled { background: #e0ecf5; color: #13415c; font-weight: 600; }
+    .result-section { background: #f0f5fb; border-radius: 32px 32px 0 0; padding: 20px 18px 30px; margin-top: 8px; width: 100%; }
+    .stats-badge { background: #d9e6f2; border-radius: 30px; padding: 8px 20px; display: inline-block; font-weight: 600; margin-bottom: 16px; }
+    .quantity-flex { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .q-item { background: white; border-radius: 40px; padding: 10px 20px; flex: 1 0 calc(50% - 10px); box-shadow: 0 4px 8px rgba(0,0,0,0.02); border: 1px solid #d2e0ee; display: flex; justify-content: space-between; }
+    .btn-calc { background: #1a5f8d; color: white; border: none; border-radius: 60px; padding: 18px 20px; font-size: 1.3rem; font-weight: 600; width: 100%; margin: 12px 0 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(26,86,129,0.2); }
+    .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f9fe; z-index: 999; transform: translateX(100%); transition: transform 0.3s ease-in-out; overflow-y: auto; padding: 20px; box-sizing: border-box; }
     .settings-overlay.active { transform: translateX(0); }
-    .settings-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 0 20px;
-    }
-    .back-btn {
-      background: #e4ecf5;
-      border: none;
-      font-size: 32px;
-      width: 48px; height: 48px;
-      border-radius: 30px;
-      cursor: pointer;
-    }
-    .price-total-line {
-      font-size: 1.2rem; margin-top: 16px;
-    }
+    .settings-header { display: flex; align-items: center; gap: 16px; padding: 8px 0 20px; background: #f5f9fe; }
+    .back-btn { background: #e4ecf5; border: none; font-size: 32px; width: 48px; height: 48px; border-radius: 30px; cursor: pointer; }
+    .price-total-line { font-size: 1.2rem; margin-top: 16px; }
     .green-bold { color: #1e7e34; font-weight: 700; }
     .blue-bold { color: #1a5f8d; font-weight: 700; }
     .red-large { color: #b22222; font-weight: 800; font-size: 1.5rem; }
-    .record-item {
-      background: white; border-radius: 20px; padding: 14px; margin-bottom: 10px;
-      border: 1px solid #d9e2ec; cursor: pointer; position: relative;
-    }
-    .record-header {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .record-index {
-      background: #1e5780; color: white; width: 26px; height: 26px; border-radius: 20px;
-      display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem;
-    }
-    .record-title {
-      flex:1; font-weight: 600; display: flex; justify-content: space-between;
-    }
-    .menu-dots {
-      padding: 4px 8px; border-radius: 20px; background: #eaf0f8;
-    }
-    .record-menu {
-      position: absolute; right: 16px; top: 48px; background: white; border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1); padding: 8px 0; z-index: 10; display: none;
-      border: 1px solid #cfdbe8;
-    }
+    .record-item { background: white; border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid #d9e2ec; cursor: pointer; position: relative; }
+    .record-header { display: flex; align-items: center; gap: 8px; }
+    .record-index { background: #1e5780; color: white; width: 26px; height: 26px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem; }
+    .record-title { flex:1; font-weight: 600; display: flex; justify-content: space-between; }
+    .menu-dots { padding: 4px 8px; border-radius: 20px; background: #eaf0f8; }
+    .record-menu { position: absolute; right: 16px; top: 48px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); padding: 8px 0; z-index: 10; display: none; border: 1px solid #cfdbe8; }
     .record-menu.show { display: block; }
-    .menu-item {
-      padding: 12px 24px; cursor: pointer; white-space: nowrap;
-    }
+    .menu-item { padding: 12px 24px; cursor: pointer; white-space: nowrap; }
     .menu-item:hover { background: #f0f6ff; }
-    .record-detail {
-      margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed #b0c8dd;
-      font-size: 0.85rem; background: #f6faff; border-radius: 18px; padding: 16px;
-      max-height: 500px; overflow-y: auto;
-    }
-    .detail-section {
-      margin-bottom: 16px; background: white; border-radius: 18px; padding: 12px;
-    }
-    .detail-section h4 {
-      font-size: 0.95rem; margin: 0 0 10px 0; color: #1e4460; border-left: 4px solid #2a7faa; padding-left: 12px;
-    }
-    .detail-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
-    }
-    .detail-item {
-      display: flex; justify-content: space-between; border-bottom: 1px dotted #cbdae6; padding: 4px 0;
-    }
+    .record-detail { margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed #b0c8dd; font-size: 0.85rem; background: #f6faff; border-radius: 18px; padding: 16px; max-height: 500px; overflow-y: auto; }
+    .detail-section { margin-bottom: 16px; background: white; border-radius: 18px; padding: 12px; }
+    .detail-section h4 { font-size: 0.95rem; margin: 0 0 10px 0; color: #1e4460; border-left: 4px solid #2a7faa; padding-left: 12px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+    .detail-item { display: flex; justify-content: space-between; border-bottom: 1px dotted #cbdae6; padding: 4px 0; }
     .hidden { display: none; }
     .small-note { color: #6b8aa8; margin-top: 6px; font-size: 0.75rem; }
-    .export-loading { text-align: center; padding: 20px; }
+    .sub-card { background: #fbfdff; border-radius: 20px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid #e6edf6; }
+    .sub-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; color: #1e4460; font-size: 1.05rem; }
   </style>
 </head>
 <body>
 <div class="app-wrapper">
   <div class="header">
-    <h1>沉井综合单价计价器</h1>
+    <h1>沉井综合单价计算器</h1>
     <div class="settings-icon" id="openSettingsBtn">⚙️</div>
   </div>
 
   <div class="input-section">
-    <!-- 基础信息 -->
     <div class="card">
       <h2>📋 基础信息</h2>
       <div class="param-grid">
@@ -266,9 +70,8 @@
         <div class="input-item"><label>砖砌体高度 (m)</label><input id="H3" type="number" step="0.01" value="0.80"></div>
         <div class="input-item readonly-highlight"><label>钢筋砼标准段高度 (m)</label><input id="H2" type="number" readonly disabled></div>
       </div>
-      <div class="small-note">标准段 = 流水面总高 - 砖砌体高度</div>
+      <div class="small-note">流水面总高 = 标准段高度 + 砖砌体高度</div>
     </div>
-    <!-- 工艺尺寸 -->
     <div class="card">
       <h2>📐 工艺尺寸</h2>
       <div class="param-grid">
@@ -282,56 +85,38 @@
         <div class="input-item"><label>封底厚度 (m)</label><input id="sealThick" type="number" step="0.01" value="1.00"></div>
       </div>
     </div>
-    <!-- 刃脚钢筋 -->
+
     <div class="card">
-      <h2>🔩 刃脚加宽段钢筋</h2>
-      <div class="param-grid">
-        <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ1" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L1" value="150"></div>
-        <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ2" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L2" value="150"></div>
-        <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ3" value="16"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L3" value="200"></div>
-        <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ4" value="16"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L4" value="200"></div>
+      <h2>🔧 钢筋型号尺寸</h2>
+      
+      <div class="sub-card" id="bladeRebarCard">
+        <div class="sub-card-header"><span>🔩 刃脚钢筋</span></div>
+        <div class="sub-card-content">
+          <div class="param-grid">
+            <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ1" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L1" value="150"></div>
+            <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ2" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L2" value="150"></div>
+            <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ3" value="16"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L3" value="200"></div>
+            <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ4" value="16"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L4" value="200"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="standardLayersContainer"></div>
+
+      <div class="sub-card" id="bottomRebarCard">
+        <div class="sub-card-header"><span>🕸 底板 & 圈梁钢筋</span></div>
+        <div class="sub-card-content">
+          <div class="param-grid">
+            <div class="input-item"><label>上层水平筋直径 (mm)</label><input id="φ17" value="12"></div><div class="input-item"><label>上层水平筋间距 (mm)</label><input id="L17" value="150"></div>
+            <div class="input-item"><label>上层纵筋直径 (mm)</label><input id="φ18" value="12"></div><div class="input-item"><label>上层纵筋间距 (mm)</label><input id="L18" value="150"></div>
+            <div class="input-item"><label>下层水平筋直径 (mm)</label><input id="φ19" value="12"></div><div class="input-item"><label>下层水平筋间距 (mm)</label><input id="L19" value="150"></div>
+            <div class="input-item"><label>下层纵筋直径 (mm)</label><input id="φ20" value="12"></div><div class="input-item"><label>下层纵筋间距 (mm)</label><input id="L20" value="150"></div>
+            <div class="input-item"><label>圈梁钢筋直径 (mm)</label><input id="φ21" value="16"></div><div class="input-item"><label>圈梁钢筋根数</label><input id="C" value="8"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- 标准段分层 -->
-    <div class="card" id="layer1Card">
-      <h2>🧱 标准段第一层 · <span id="h1_display">1.20</span>m</h2>
-      <div class="param-grid">
-        <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ5" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L5" value="150"></div>
-        <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ6" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L6" value="150"></div>
-        <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ7" value="14"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L7" value="200"></div>
-        <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ8" value="14"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L8" value="200"></div>
-      </div>
-    </div>
-    <div class="card" id="layer2Card">
-      <h2>🧱 标准段第二层 · <span id="h2_display">1.20</span>m</h2>
-      <div class="param-grid">
-        <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ9" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L9" value="150"></div>
-        <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ10" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L10" value="150"></div>
-        <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ11" value="14"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L11" value="200"></div>
-        <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ12" value="14"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L12" value="200"></div>
-      </div>
-    </div>
-    <div class="card" id="layer3Card">
-      <h2>🧱 标准段第三层 · <span id="h3_display">0.00</span>m</h2>
-      <div class="param-grid">
-        <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ13" value="12" disabled></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L13" value="150" disabled></div>
-        <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ14" value="12" disabled></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L14" value="150" disabled></div>
-        <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ15" value="14" disabled></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L15" value="200" disabled></div>
-        <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ16" value="14" disabled></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L16" value="200" disabled></div>
-      </div>
-    </div>
-    <!-- 底板圈梁 -->
-    <div class="card">
-      <h2>🕸 底板 & 圈梁钢筋</h2>
-      <div class="param-grid">
-        <div class="input-item"><label>上层水平筋直径 (mm)</label><input id="φ17" value="12"></div><div class="input-item"><label>上层水平筋间距 (mm)</label><input id="L17" value="150"></div>
-        <div class="input-item"><label>上层纵筋直径 (mm)</label><input id="φ18" value="12"></div><div class="input-item"><label>上层纵筋间距 (mm)</label><input id="L18" value="150"></div>
-        <div class="input-item"><label>下层水平筋直径 (mm)</label><input id="φ19" value="12"></div><div class="input-item"><label>下层水平筋间距 (mm)</label><input id="L19" value="150"></div>
-        <div class="input-item"><label>下层纵筋直径 (mm)</label><input id="φ20" value="12"></div><div class="input-item"><label>下层纵筋间距 (mm)</label><input id="L20" value="150"></div>
-        <div class="input-item"><label>圈梁钢筋直径 (mm)</label><input id="φ21" value="16"></div><div class="input-item"><label>圈梁钢筋根数</label><input id="C" value="8"></div>
-      </div>
-    </div>
-    <!-- 单价费率 -->
+
     <div class="card">
       <h2>💰 单价 & 费率</h2>
       <div class="param-grid">
@@ -359,7 +144,6 @@
   </div>
 </div>
 
-<!-- 设置浮层 -->
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-header">
     <button class="back-btn" id="closeSettingsBtn">←</button>
@@ -376,13 +160,14 @@
     <div class="card">
       <h3>🔧 全局参数</h3>
       <div class="param-grid">
-        <div class="input-item"><label>底板长度系数</label><input id="kLen" value="0.8862" step="0.0001" disabled></div>
-        <div class="input-item"><label>保护层厚度 (mm)</label><input id="protect" value="30" disabled></div>
+        <div class="input-item"><label>钢筋原材长度 (m)</label><input id="barLength" value="9.0" step="0.1" disabled></div>
+        <div class="input-item"><label>钢筋损耗率 (%)</label><input id="lossRate" value="1.2" disabled></div>
+        <div class="input-item"><label>底板钢筋长度系数</label><input id="kLen" value="0.8862" step="0.0001" disabled></div>
         <div class="input-item"><label>搭接系数 (d倍数)</label><input id="lapFactor" value="35" disabled></div>
+        <div class="input-item"><label>保护层厚度 (mm)</label><input id="protect" value="30" disabled></div>
         <div class="input-item"><label>砖长 (m)</label><input id="brickL" value="0.22" disabled></div>
         <div class="input-item"><label>砖宽 (m)</label><input id="brickW" value="0.11" disabled></div>
         <div class="input-item"><label>砖高 (m)</label><input id="brickH" value="0.055" disabled></div>
-        <div class="input-item"><label>钢筋损耗率 (%)</label><input id="lossRate" value="1.2" disabled></div>
       </div>
       <button id="applySettingsBtn" style="margin-top:20px; width:100%; padding:16px; border-radius:40px; background:#1a5f8d; color:white; border:none;">应用并返回</button>
     </div>
@@ -395,65 +180,124 @@
 
 <script>
   (function(){
-    let config = { kLen:0.8862, protect:30, lapFactor:35, brick:[0.22,0.11,0.055], lossRate:1.2 };
+    // 全局配置
+    let config = { 
+      barLength: 9.0,
+      kLen:0.8862, 
+      protect:30, 
+      lapFactor:35, 
+      brick:[0.22,0.11,0.055], 
+      lossRate:1.2 
+    };
     let unlocked = false;
     const STORAGE_KEY = 'caisson_records';
     const LAST_INPUT_KEY = 'caisson_last_input';
     let activeMenuId = null;
 
-    // DOM 辅助
     const D=()=>parseFloat(document.getElementById('D').value)||0;
     const totalFlowH=()=>parseFloat(document.getElementById('totalFlowH').value)||0;
     const H3=()=>parseFloat(document.getElementById('H3').value)||0;
     const H2_input=document.getElementById('H2');
     
-    function syncH2(){ let h2=totalFlowH()-H3(); if(h2<0)h2=0; H2_input.value=h2.toFixed(3); updateLayers(); }
-    function updateLayers(){
-      const H2m=parseFloat(H2_input.value)||0;
-      const maxPer=7.0; let layers=1; if(H2m>0) layers=Math.ceil(H2m/maxPer);
-      const per=H2m/layers;
-      document.getElementById('h1_display').textContent=per.toFixed(3);
-      document.getElementById('h2_display').textContent=per.toFixed(3);
-      const h3m=layers>=3?per:0;
-      document.getElementById('h3_display').textContent=h3m.toFixed(3);
-      const dis3=layers<3;
-      ['φ13','L13','φ14','L14','φ15','L15','φ16','L16'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.disabled=dis3; if(dis3)el.value=0; } });
-      const dis2=layers<2;
-      ['φ9','L9','φ10','L10','φ11','L11','φ12','L12'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.disabled=dis2; if(dis2)el.value=0; } });
-      document.getElementById('layer2Card').style.opacity=dis2?'0.6':'1';
-      document.getElementById('layer3Card').style.opacity=dis3?'0.6':'1';
-      return {layers, per};
+    function syncH2(){ 
+      // 严格遵循：流水面总高度 = 标准段高度 + 砖砌体高度
+      let h2 = totalFlowH() - H3(); 
+      if(h2 < 0) h2 = 0; 
+      H2_input.value = h2.toFixed(3); 
+      renderStandardLayers(); 
     }
-    document.getElementById('totalFlowH').addEventListener('input',syncH2);
-    document.getElementById('H3').addEventListener('input',syncH2);
+    
+    function renderStandardLayers(){
+      const H2m = parseFloat(H2_input.value) || 0;
+      const maxPer = 7.0;
+      const layers = H2m > 0 ? Math.ceil(H2m / maxPer) : 1;
+      const perLayer = H2m / layers;
+      
+      const container = document.getElementById('standardLayersContainer');
+      let html = '';
+      
+      html += `
+        <div class="sub-card" id="layer1SubCard">
+          <div class="sub-card-header">
+            <span>🧱 标准段第一层钢筋 · <span class="layer-height">${perLayer.toFixed(3)}</span>m</span>
+          </div>
+          <div class="sub-card-content">
+            <div class="param-grid">
+              <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ5" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L5" value="150"></div>
+              <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ6" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L6" value="150"></div>
+              <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ7" value="14"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L7" value="200"></div>
+              <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ8" value="14"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L8" value="200"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      for (let i = 2; i <= layers; i++) {
+        const basePhi = 5 + (i-1)*4;
+        html += `
+          <div class="sub-card" id="layer${i}SubCard">
+            <div class="sub-card-header">
+              <span>🧱 标准段第${i}层钢筋 · <span class="layer-height">${perLayer.toFixed(3)}</span>m</span>
+            </div>
+            <div class="sub-card-content">
+              <div class="param-grid">
+                <div class="input-item"><label>内侧水平筋直径 (mm)</label><input id="φ${basePhi}" value="12"></div><div class="input-item"><label>内侧水平筋间距 (mm)</label><input id="L${basePhi}" value="150"></div>
+                <div class="input-item"><label>外侧水平筋直径 (mm)</label><input id="φ${basePhi+1}" value="12"></div><div class="input-item"><label>外侧水平筋间距 (mm)</label><input id="L${basePhi+1}" value="150"></div>
+                <div class="input-item"><label>内侧站筋直径 (mm)</label><input id="φ${basePhi+2}" value="14"></div><div class="input-item"><label>内侧站筋间距 (mm)</label><input id="L${basePhi+2}" value="200"></div>
+                <div class="input-item"><label>外侧站筋直径 (mm)</label><input id="φ${basePhi+3}" value="14"></div><div class="input-item"><label>外侧站筋间距 (mm)</label><input id="L${basePhi+3}" value="200"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+      return { layers, perLayer };
+    }
+    
+    document.getElementById('totalFlowH').addEventListener('input', syncH2);
+    document.getElementById('H3').addEventListener('input', syncH2);
 
     function captureInputs(){
-      return {
+      const base = {
         D: D(), totalFlowH: totalFlowH(), H3: H3(), H1: parseFloat(document.getElementById('H1').value)||0, A1: parseFloat(document.getElementById('A1').value)||0,
         A2: parseFloat(document.getElementById('A2').value)||0, A3: parseFloat(document.getElementById('A3').value)||0, H4: parseFloat(document.getElementById('H4').value)||0,
         A4: parseFloat(document.getElementById('A4').value)||0, B: parseFloat(document.getElementById('B').value)||0, sealThick: parseFloat(document.getElementById('sealThick').value)||0,
-        φ1: document.getElementById('φ1').value, L1: document.getElementById('L1').value, φ2: document.getElementById('φ2').value, L2: document.getElementById('L2').value,
-        φ3: document.getElementById('φ3').value, L3: document.getElementById('L3').value, φ4: document.getElementById('φ4').value, L4: document.getElementById('L4').value,
-        φ5: document.getElementById('φ5').value, L5: document.getElementById('L5').value, φ6: document.getElementById('φ6').value, L6: document.getElementById('L6').value,
-        φ7: document.getElementById('φ7').value, L7: document.getElementById('L7').value, φ8: document.getElementById('φ8').value, L8: document.getElementById('L8').value,
-        φ9: document.getElementById('φ9').value, L9: document.getElementById('L9').value, φ10: document.getElementById('φ10').value, L10: document.getElementById('L10').value,
-        φ11: document.getElementById('φ11').value, L11: document.getElementById('L11').value, φ12: document.getElementById('φ12').value, L12: document.getElementById('L12').value,
-        φ13: document.getElementById('φ13').value, L13: document.getElementById('L13').value, φ14: document.getElementById('φ14').value, L14: document.getElementById('L14').value,
-        φ15: document.getElementById('φ15').value, L15: document.getElementById('L15').value, φ16: document.getElementById('φ16').value, L16: document.getElementById('L16').value,
-        φ17: document.getElementById('φ17').value, L17: document.getElementById('L17').value, φ18: document.getElementById('φ18').value, L18: document.getElementById('L18').value,
-        φ19: document.getElementById('φ19').value, L20: document.getElementById('L20').value, φ20: document.getElementById('φ20').value, L19: document.getElementById('L19').value,
-        φ21: document.getElementById('φ21').value, C: document.getElementById('C').value,
+        φ1: document.getElementById('φ1')?.value, L1: document.getElementById('L1')?.value, φ2: document.getElementById('φ2')?.value, L2: document.getElementById('L2')?.value,
+        φ3: document.getElementById('φ3')?.value, L3: document.getElementById('L3')?.value, φ4: document.getElementById('φ4')?.value, L4: document.getElementById('L4')?.value,
+        φ17: document.getElementById('φ17')?.value, L17: document.getElementById('L17')?.value, φ18: document.getElementById('φ18')?.value, L18: document.getElementById('L18')?.value,
+        φ19: document.getElementById('φ19')?.value, L19: document.getElementById('L19')?.value, φ20: document.getElementById('φ20')?.value, L20: document.getElementById('L20')?.value,
+        φ21: document.getElementById('φ21')?.value, C: document.getElementById('C')?.value,
         priceLabTemplate: document.getElementById('priceLabTemplate').value, priceLabRebar: document.getElementById('priceLabRebar').value,
         priceLabConc: document.getElementById('priceLabConc').value, priceLabMasonry: document.getElementById('priceLabMasonry').value,
         priceMatRebar: document.getElementById('priceMatRebar').value, priceMatConc: document.getElementById('priceMatConc').value, priceMatBrick: document.getElementById('priceMatBrick').value,
         priceMachExc: document.getElementById('priceMachExc').value, priceMachTrans: document.getElementById('priceMachTrans').value,
         manageRate: document.getElementById('manageRate').value, profitRate: document.getElementById('profitRate').value, taxRate: document.getElementById('taxRate').value,
       };
+      const layers = document.querySelectorAll('#standardLayersContainer .sub-card');
+      layers.forEach((card, idx) => {
+        const layerIdx = idx + 1;
+        const basePhi = 5 + (layerIdx-1)*4;
+        base[`φ${basePhi}`] = document.getElementById(`φ${basePhi}`)?.value;
+        base[`L${basePhi}`] = document.getElementById(`L${basePhi}`)?.value;
+        base[`φ${basePhi+1}`] = document.getElementById(`φ${basePhi+1}`)?.value;
+        base[`L${basePhi+1}`] = document.getElementById(`L${basePhi+1}`)?.value;
+        base[`φ${basePhi+2}`] = document.getElementById(`φ${basePhi+2}`)?.value;
+        base[`L${basePhi+2}`] = document.getElementById(`L${basePhi+2}`)?.value;
+        base[`φ${basePhi+3}`] = document.getElementById(`φ${basePhi+3}`)?.value;
+        base[`L${basePhi+3}`] = document.getElementById(`L${basePhi+3}`)?.value;
+      });
+      return base;
     }
+    
     function restoreInputs(data){
       if(!data) return;
-      Object.keys(data).forEach(k=>{ const el=document.getElementById(k); if(el) el.value=data[k]; });
-      syncH2(); updateLayers();
+      if(data.totalFlowH) document.getElementById('totalFlowH').value = data.totalFlowH;
+      if(data.H3) document.getElementById('H3').value = data.H3;
+      syncH2(); 
+      Object.keys(data).forEach(k=>{ 
+        const el = document.getElementById(k); 
+        if(el) el.value = data[k]; 
+      });
     }
 
     function compute(shouldSave=true){
@@ -465,73 +309,144 @@
       const H4_m=parseFloat(document.getElementById('H4').value)||0; const A4_m=parseFloat(document.getElementById('A4').value)||0;
       const B_m=parseFloat(document.getElementById('B').value)||0;
       const seal_m=parseFloat(document.getElementById('sealThick').value)||0;
-      const {layers, per}=updateLayers();
-      const h1_m=per, h2_m=per, h3_m=layers>=3?per:0;
+      
+      const layers = document.querySelectorAll('#standardLayersContainer .sub-card').length;
+      const perLayer = H2_m / layers;
+      
       const protect_m=config.protect/1000;
       const PI=Math.PI, ceil=Math.ceil;
       const coeff=0.00617;
-      function wt(d,l){return coeff*d*d*l;}
-      function horz(d,sp,ht,diaC){ if(ht<=0||d<=0)return 0; const n=ceil(ht/sp+1); const lap=(config.lapFactor*d/1000)*n; return wt(d, PI*diaC*n + lap); }
-      function vert(d,sp,ht,diaC){ if(ht<=0||d<=0)return 0; return wt(d, ht*ceil(PI*diaC/sp)); }
-      function lapWt(d,sp,diaC){ if(d<=0)return 0; return wt(d, (config.lapFactor*d/1000)*ceil(PI*diaC/sp)); }
-      const diaIn=D_m+2*protect_m, diaOut1=D_m+2*A1_m-2*protect_m, diaOut2=D_m+2*A2_m-2*protect_m;
-      const φ=id=>parseFloat(document.getElementById(id).value)||0;
-      const sp=id=>parseFloat(document.getElementById(id).value)/1000||0;
-      let G=0;
-      G+=horz(φ('φ1'),sp('L1'),H1_m,diaIn)+horz(φ('φ2'),sp('L2'),H1_m,diaOut1);
-      G+=vert(φ('φ3'),sp('L3'),H1_m,diaIn)+vert(φ('φ4'),sp('L4'),H1_m,diaOut1);
-      G+=horz(φ('φ5'),sp('L5'),h1_m,diaIn)+horz(φ('φ6'),sp('L6'),h1_m,diaOut2);
-      G+=vert(φ('φ7'),sp('L7'),h1_m,diaIn)+vert(φ('φ8'),sp('L8'),h1_m,diaOut2);
-      if(h2_m>0){ G+=horz(φ('φ9'),sp('L9'),h2_m,diaIn)+horz(φ('φ10'),sp('L10'),h2_m,diaOut2); G+=vert(φ('φ11'),sp('L11'),h2_m,diaIn)+vert(φ('φ12'),sp('L12'),h2_m,diaOut2); }
-      if(h3_m>0){ G+=horz(φ('φ13'),sp('L13'),h3_m,diaIn)+horz(φ('φ14'),sp('L14'),h3_m,diaOut2); G+=vert(φ('φ15'),sp('L15'),h3_m,diaIn)+vert(φ('φ16'),sp('L16'),h3_m,diaOut2); }
-      G+=lapWt(φ('φ3'),sp('L3'),diaIn)+lapWt(φ('φ4'),sp('L4'),diaOut1);
-      G+=lapWt(φ('φ7'),sp('L7'),diaIn)+lapWt(φ('φ11'),sp('L11'),diaIn);
-      G+=lapWt(φ('φ8'),sp('L8'),diaOut2)+lapWt(φ('φ12'),sp('L12'),diaOut2);
-      if(h3_m>0){ G+=lapWt(φ('φ11'),sp('L11'),diaIn)+lapWt(φ('φ15'),sp('L15'),diaIn); G+=lapWt(φ('φ12'),sp('L12'),diaOut2)+lapWt(φ('φ16'),sp('L16'),diaOut2); }
-      const single=config.kLen*D_m;
-      G+=wt(φ('φ17'),single*ceil(D_m/sp('L17')))+wt(φ('φ18'),single*ceil(D_m/sp('L18')))+wt(φ('φ19'),single*ceil(D_m/sp('L19')))+wt(φ('φ20'),single*ceil(D_m/sp('L20')));
-      G+=wt(φ('φ21'), parseFloat(document.getElementById('C').value)*PI*(D_m+2*protect_m));
-      G*=(1+config.lossRate/100);
-      const S=PI*H1_m*(2*D_m+2*A1_m)+PI*H2_m*(2*D_m+2*A2_m)+PI*H3_m*(2*D_m+2*A3_m)+PI*H4_m*(2*D_m+2*A4_m);
-      const V=PI*H1_m*A1_m*(D_m+A1_m)+PI*H2_m*A2_m*(D_m+A2_m)+PI*(D_m/2)*(D_m/2)*seal_m+PI*(D_m/2)*(D_m/2)*B_m+PI*H4_m*A4_m*(D_m+A4_m);
-      const brickVol=PI*H3_m*A3_m*(D_m+A3_m);
-      const unit=config.brick[0]*config.brick[1]*config.brick[2];
-      const Q=Math.ceil(brickVol/unit);
-      const Vsoil=PI*((D_m+2*A1_m)/2)*((D_m+2*A1_m)/2)*(H1_m+H2_m+H3_m);
       
-      const G_ton=G/1000;
-      const labT=parseFloat(document.getElementById('priceLabTemplate').value);
-      const labRebar=parseFloat(document.getElementById('priceLabRebar').value);
-      const labConc=parseFloat(document.getElementById('priceLabConc').value);
-      const labMason=parseFloat(document.getElementById('priceLabMasonry').value);
-      const matRebar=parseFloat(document.getElementById('priceMatRebar').value);
-      const matConc=parseFloat(document.getElementById('priceMatConc').value);
-      const matBrick=parseFloat(document.getElementById('priceMatBrick').value);
-      const machExc=parseFloat(document.getElementById('priceMachExc').value);
-      const machTrans=parseFloat(document.getElementById('priceMachTrans').value);
-      const managePct=parseFloat(document.getElementById('manageRate').value)/100;
-      const profitPct=parseFloat(document.getElementById('profitRate').value)/100;
-      const taxPct=parseFloat(document.getElementById('taxRate').value)/100;
+      // 水平筋搭接次数处理
+      function horzWt(d, sp, height, diaCircle) {
+        if (height <= 0 || d <= 0) return 0;
+        const n = ceil(height / sp + 1);
+        const circleLen = PI * diaCircle;
+        const splicesPerLoop = Math.ceil(circleLen / config.barLength);
+        const lapLen = (config.lapFactor * d / 1000);
+        const totalLap = splicesPerLoop * lapLen * n;
+        return coeff * d * d * (circleLen * n + totalLap);
+      }
       
-      const labor=S*labT + G_ton*labRebar + V*labConc + Q*labMason;
-      const material=G_ton*matRebar + V*matConc + Q*matBrick;
-      const machine=Vsoil*machExc + Vsoil*machTrans;
-      const costSubtotal=labor+material+machine;
-      const manageFee=costSubtotal*managePct;
-      const costTotal=costSubtotal+manageFee;
-      const profitTotal=costTotal*(1+profitPct);
-      const taxTotal=profitTotal*(1+taxPct);
+      function vertWt(d, sp, height, diaCircle) {
+        if (height <= 0 || d <= 0) return 0;
+        const n = ceil(PI * diaCircle / sp);
+        return coeff * d * d * (height * n);
+      }
       
-      const result = { S, G, V, Q, Vsoil, costTotal, profitTotal, taxTotal, labor, material, machine, manageFee };
+      function lapWt(d, sp, diaCircle) {
+        if (d <= 0) return 0;
+        const n = ceil(PI * diaCircle / sp);
+        const lapLen = config.lapFactor * d / 1000;
+        return coeff * d * d * (lapLen * n);
+      }
       
-      document.getElementById('quantityContainer').innerHTML=`
-        <div class="q-item"><span>模板</span><strong>${S.toFixed(2)} m²</strong></div>
-        <div class="q-item"><span>钢筋</span><strong>${Math.round(G)} kg</strong></div>
-        <div class="q-item"><span>混凝土</span><strong>${V.toFixed(2)} m³</strong></div>
-        <div class="q-item"><span>砖砌体</span><strong>${Q} 块</strong></div>
-        <div class="q-item"><span>土方</span><strong>${Vsoil.toFixed(2)} m³</strong></div>
+      const diaIn = D_m + 2*protect_m;
+      const diaOut1 = D_m + 2*A1_m - 2*protect_m;
+      const diaOut2 = D_m + 2*A2_m - 2*protect_m;
+      
+      let G = 0;
+      // 刃脚钢筋
+      G += horzWt(parseFloat(document.getElementById('φ1').value), parseFloat(document.getElementById('L1').value)/1000, H1_m, diaIn);
+      G += horzWt(parseFloat(document.getElementById('φ2').value), parseFloat(document.getElementById('L2').value)/1000, H1_m, diaOut1);
+      G += vertWt(parseFloat(document.getElementById('φ3').value), parseFloat(document.getElementById('L3').value)/1000, H1_m, diaIn);
+      G += vertWt(parseFloat(document.getElementById('φ4').value), parseFloat(document.getElementById('L4').value)/1000, H1_m, diaOut1);
+      
+      // 动态标准段钢筋
+      const layerCards = document.querySelectorAll('#standardLayersContainer .sub-card');
+      layerCards.forEach((card, idx) => {
+        const layerIdx = idx + 1;
+        const basePhi = 5 + (layerIdx-1)*4;
+        const h_m = perLayer;
+        const phi_inner_h = parseFloat(document.getElementById(`φ${basePhi}`)?.value)||0;
+        const L_inner_h = parseFloat(document.getElementById(`L${basePhi}`)?.value)/1000||0;
+        const phi_outer_h = parseFloat(document.getElementById(`φ${basePhi+1}`)?.value)||0;
+        const L_outer_h = parseFloat(document.getElementById(`L${basePhi+1}`)?.value)/1000||0;
+        const phi_inner_v = parseFloat(document.getElementById(`φ${basePhi+2}`)?.value)||0;
+        const L_inner_v = parseFloat(document.getElementById(`L${basePhi+2}`)?.value)/1000||0;
+        const phi_outer_v = parseFloat(document.getElementById(`φ${basePhi+3}`)?.value)||0;
+        const L_outer_v = parseFloat(document.getElementById(`L${basePhi+3}`)?.value)/1000||0;
+        
+        G += horzWt(phi_inner_h, L_inner_h, h_m, diaIn);
+        G += horzWt(phi_outer_h, L_outer_h, h_m, diaOut2);
+        G += vertWt(phi_inner_v, L_inner_v, h_m, diaIn);
+        G += vertWt(phi_outer_v, L_outer_v, h_m, diaOut2);
+      });
+      
+      // 层间纵向搭接 (切记不“双重计算”，仅计入一次搭接量)
+      for (let i = 0; i < layerCards.length - 1; i++) {
+        const currIdx = i+1;
+        const baseCurr = 5 + (currIdx-1)*4;
+        const phi_inner_curr = parseFloat(document.getElementById(`φ${baseCurr+2}`)?.value)||0;
+        const L_inner_curr = parseFloat(document.getElementById(`L${baseCurr+2}`)?.value)/1000||0;
+        const phi_outer_curr = parseFloat(document.getElementById(`φ${baseCurr+3}`)?.value)||0;
+        const L_outer_curr = parseFloat(document.getElementById(`L${baseCurr+3}`)?.value)/1000||0;
+        
+        G += lapWt(phi_inner_curr, L_inner_curr, diaIn);
+        G += lapWt(phi_outer_curr, L_outer_curr, diaOut2);
+      }
+      // 刃脚与第一层纵向搭接 (仅计入一次搭接量)
+      G += lapWt(parseFloat(document.getElementById('φ3').value), parseFloat(document.getElementById('L3').value)/1000, diaIn);
+      G += lapWt(parseFloat(document.getElementById('φ4').value), parseFloat(document.getElementById('L4').value)/1000, diaOut1);
+      
+      // 底板与圈梁钢筋 (封底无钢筋)
+      const single = config.kLen * D_m;
+      G += coeff * (parseFloat(document.getElementById('φ17').value)**2) * single * ceil(D_m / (parseFloat(document.getElementById('L17').value)/1000));
+      G += coeff * (parseFloat(document.getElementById('φ18').value)**2) * single * ceil(D_m / (parseFloat(document.getElementById('L18').value)/1000));
+      G += coeff * (parseFloat(document.getElementById('φ19').value)**2) * single * ceil(D_m / (parseFloat(document.getElementById('L19').value)/1000));
+      G += coeff * (parseFloat(document.getElementById('φ20').value)**2) * single * ceil(D_m / (parseFloat(document.getElementById('L20').value)/1000));
+      G += coeff * (parseFloat(document.getElementById('φ21').value)**2) * (parseFloat(document.getElementById('C').value) * PI * (D_m + A4_m));
+      
+      G *= (1 + config.lossRate / 100);
+      
+      // 工程量计算开始
+      // 模板面积：刃脚、标准段、锁口圈梁（无顶底板、无封底底板、无砖砌体）
+      const S = PI*H1_m*(2*D_m+2*A1_m) + PI*H2_m*(2*D_m+2*A2_m) + PI*H4_m*(2*D_m+2*A4_m);
+      
+      // 混凝土体积：刃脚、标准段、底板、封底、锁口圈梁
+      const V = PI*H1_m*A1_m*(D_m+A1_m) + PI*H2_m*A2_m*(D_m+A2_m) + PI*(D_m/2)*(D_m/2)*seal_m + PI*(D_m/2)*(D_m/2)*B_m + PI*H4_m*A4_m*(D_m+A4_m);
+      
+      // 砖砌体体积计算与块数转换 (灰缝精确按 0.5cm = 0.005m 计算)
+      const brickVol = PI*H3_m*A3_m*(D_m+A3_m);
+      const unitWithMortar = (config.brick[0] + 0.005) * config.brick[1] * (config.brick[2] + 0.005);
+      const Q = Math.ceil(brickVol / unitWithMortar);
+      
+      // 土方体积：刃脚+标准段+砖砌体高度，直径按刃脚外径 (锁口圈梁在地表以上不计入)
+      const Vsoil = PI * ((D_m+2*A1_m)/2) * ((D_m+2*A1_m)/2) * (H1_m + H2_m + H3_m);
+      
+      const G_ton = G / 1000;
+      const labT = parseFloat(document.getElementById('priceLabTemplate').value);
+      const labRebar = parseFloat(document.getElementById('priceLabRebar').value);
+      const labConc = parseFloat(document.getElementById('priceLabConc').value);
+      const labMason = parseFloat(document.getElementById('priceLabMasonry').value);
+      const matRebar = parseFloat(document.getElementById('priceMatRebar').value);
+      const matConc = parseFloat(document.getElementById('priceMatConc').value);
+      const matBrick = parseFloat(document.getElementById('priceMatBrick').value);
+      const machExc = parseFloat(document.getElementById('priceMachExc').value);
+      const machTrans = parseFloat(document.getElementById('priceMachTrans').value);
+      const managePct = parseFloat(document.getElementById('manageRate').value)/100;
+      const profitPct = parseFloat(document.getElementById('profitRate').value)/100;
+      const taxPct = parseFloat(document.getElementById('taxRate').value)/100;
+      
+      const labor = S*labT + G_ton*labRebar + V*labConc + Q*labMason;
+      const material = G_ton*matRebar + V*matConc + Q*matBrick;
+      const machine = Vsoil*machExc + Vsoil*machTrans;
+      const costSubtotal = labor + material + machine;
+      const manageFee = costSubtotal * managePct;
+      const costTotal = costSubtotal + manageFee;
+      const profitTotal = costTotal * (1 + profitPct);
+      const taxTotal = profitTotal * (1 + taxPct);
+      
+      const result = { S, G, V, Q, Vsoil, costTotal, profitTotal, taxTotal };
+      
+      document.getElementById('quantityContainer').innerHTML = `
+        <div class="q-item"><span>模板：</span><strong>${S.toFixed(2)} m²</strong></div>
+        <div class="q-item"><span>钢筋：</span><strong>${Math.round(G)} kg</strong></div>
+        <div class="q-item"><span>混凝土：</span><strong>${V.toFixed(2)} m³</strong></div>
+        <div class="q-item"><span>砖砌体：</span><strong>${Q} 块</strong></div>
+        <div class="q-item"><span>土方：</span><strong>${Vsoil.toFixed(2)} m³</strong></div>
       `;
-      document.getElementById('costDetailContainer').innerHTML=`
+      document.getElementById('costDetailContainer').innerHTML = `
         <div style="background:white; border-radius:24px; padding:16px;">
           <div style="font-weight:600;">🧾 成本明细</div>
           <table style="width:100%"><tr><td>👤模板人工</td><td>${(S*labT).toFixed(2)}</td></tr>
@@ -544,14 +459,14 @@
           <tr><td>🚜长臂挖机</td><td>${(Vsoil*machExc).toFixed(2)}</td></tr>
           <tr><td>🚜土方外运</td><td>${(Vsoil*machTrans).toFixed(2)}</td></tr>
           <tr><td>📋管理费</td><td>${manageFee.toFixed(2)}</td></tr>
-          <tr style="font-weight:700; color:#1e7e34;"><td>成本合计</td><td>${costTotal.toFixed(2)}</td></tr>
+          <tr style="font-weight:700; color:#1e7e34;"><td>成本合计：</td><td>${costTotal.toFixed(2)}</td></tr>
           </table>
           <div class="price-total-line"><span class="blue-bold">含利润总价: ${profitTotal.toFixed(2)} 元</span></div>
           <div class="price-total-line"><span class="red-large">含税总价: ${taxTotal.toFixed(2)} 元</span></div>
         </div>
       `;
 
-      if(shouldSave){
+      if (shouldSave) {
         const inputs = captureInputs();
         const record = {
           id: Date.now(),
@@ -567,6 +482,7 @@
       return {inputs: captureInputs(), results: result, config: {...config}};
     }
 
+    // ---------- 记录管理 ----------
     function loadRecords(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     function saveRecord(record){
       const records = loadRecords();
@@ -580,44 +496,60 @@
       let recs=loadRecords(); const idx=recs.findIndex(r=>r.id==id); if(idx>-1){ recs[idx].label=newName; localStorage.setItem(STORAGE_KEY, JSON.stringify(recs)); renderHistory(); }
     }
 
-    function renderHistory(){
-      const records = loadRecords().reverse();
-      const container = document.getElementById('historyList');
-      container.innerHTML = records.map((r, idx)=>{
-        const inp = r.inputs; const res = r.results; const cfg = r.config;
-        // 生成详细内容html (用于展示和导出)
-        const detailHtml = generateRecordDetailHtml(inp, res, cfg);
-        return `
-        <div class="record-item" data-id="${r.id}" onclick="toggleRecord(this, ${r.id})">
-          <div class="record-header">
-            <span class="record-index">${records.length - idx}</span>
-            <span class="record-title">${r.label} <span style="font-size:0.7rem;color:#557c9a;">${r.timestamp}</span></span>
-            <span class="menu-dots" onclick="event.stopPropagation();toggleMenu(${r.id})">⋯</span>
-          </div>
-          <div class="record-menu" id="menu-${r.id}">
-            <div class="menu-item" onclick="event.stopPropagation();renamePrompt(${r.id})">✏️ 重命名</div>
-            <div class="menu-item" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️ 删除</div>
-            <div class="menu-item" onclick="event.stopPropagation();exportRecordById(${r.id}, 'excel')">📊 导出Excel</div>
-            <div class="menu-item" onclick="event.stopPropagation();exportRecordById(${r.id}, 'pdf')">📄 导出PDF</div>
-            <div class="menu-item" onclick="event.stopPropagation();exportRecordById(${r.id}, 'png')">🖼️ 导出PNG</div>
-          </div>
-          <div class="record-detail hidden" id="detail-${r.id}">
-            ${detailHtml}
-          </div>
-        </div>
-      `}).join('');
+    function generateRecordText(rec){
+      const inp=rec.inputs, res=rec.results;
+      const H2 = inp.totalFlowH - inp.H3;
+      const G_ton = res.G/1000;
+      const managePct = inp.manageRate/100;
+      const laborCost = res.S*inp.priceLabTemplate + G_ton*inp.priceLabRebar + res.V*inp.priceLabConc + res.Q*inp.priceLabMasonry;
+      const materialCost = G_ton*inp.priceMatRebar + res.V*inp.priceMatConc + res.Q*inp.priceMatBrick;
+      const machineCost = res.Vsoil*inp.priceMachExc + res.Vsoil*inp.priceMachTrans;
+      const manageFee = (laborCost+materialCost+machineCost)*managePct;
+      
+      return `【沉井计算记录】${rec.label}  ${rec.timestamp}
+基础信息：
+  沉井内径：${inp.D.toFixed(2)} m
+  流水面总高度：${inp.totalFlowH.toFixed(2)} m
+  砖砌体高度：${inp.H3.toFixed(2)} m
+  钢筋砼标准段高度：${H2.toFixed(2)} m
+工艺尺寸：
+  刃脚高度：${inp.H1.toFixed(2)} m  刃脚壁厚：${inp.A1.toFixed(2)} m
+  标准段壁厚：${inp.A2.toFixed(2)} m  砖砌体壁厚：${inp.A3.toFixed(2)} m
+  圈梁高度：${inp.H4.toFixed(2)} m  圈梁壁厚：${inp.A4.toFixed(2)} m
+  底板厚度：${inp.B.toFixed(2)} m  封底厚度：${inp.sealThick.toFixed(2)} m
+刃脚钢筋：
+  内侧水平筋：${inp.φ1}mm@${inp.L1}mm  外侧水平筋：${inp.φ2}mm@${inp.L2}mm
+  内侧站筋：${inp.φ3}mm@${inp.L3}mm  外侧站筋：${inp.φ4}mm@${inp.L4}mm
+标准段第一层：
+  内侧水平筋：${inp.φ5}mm@${inp.L5}mm  外侧水平筋：${inp.φ6}mm@${inp.L6}mm
+  内侧站筋：${inp.φ7}mm@${inp.L7}mm  外侧站筋：${inp.φ8}mm@${inp.L8}mm
+单价&费率：
+  人工：模板${inp.priceLabTemplate}元/m² 钢筋${inp.priceLabRebar}元/吨 混凝土${inp.priceLabConc}元/m³ 砖砌体${inp.priceLabMasonry}元/块
+  材料：钢筋${inp.priceMatRebar}元/吨 混凝土${inp.priceMatConc}元/m³ 砖${inp.priceMatBrick}元/块
+  机械：长臂挖机${inp.priceMachExc}元/m³ 土方外运${inp.priceMachTrans}元/m³
+  管理费率：${inp.manageRate}%  利润率：${inp.profitRate}%  税率：${inp.taxRate}%
+工程量：
+  模板：${res.S.toFixed(2)} m²  钢筋：${Math.round(res.G)} kg  混凝土：${res.V.toFixed(2)} m³
+  砖砌体：${res.Q} 块  土方：${res.Vsoil.toFixed(2)} m³
+成本明细：
+  模板人工：${(res.S*inp.priceLabTemplate).toFixed(2)}  钢筋人工：${(G_ton*inp.priceLabRebar).toFixed(2)}
+  混凝土人工：${(res.V*inp.priceLabConc).toFixed(2)}  砖砌体人工：${(res.Q*inp.priceLabMasonry).toFixed(2)}
+  钢筋材料：${(G_ton*inp.priceMatRebar).toFixed(2)}  混凝土材料：${(res.V*matConc).toFixed(2)}
+  砖材料：${(res.Q*inp.priceMatBrick).toFixed(2)}
+  长臂挖机：${(res.Vsoil*inp.priceMachExc).toFixed(2)}  土方外运：${(res.Vsoil*inp.priceMachTrans).toFixed(2)}
+  管理费：${manageFee.toFixed(2)}
+  成本合计：${res.costTotal.toFixed(2)} 元
+  含利润总价：${res.profitTotal.toFixed(2)} 元
+  含税总价：${res.taxTotal.toFixed(2)} 元`;
     }
 
     function generateRecordDetailHtml(inp, res, cfg){
       const D_m = inp.D; const H1=inp.H1; const H2 = inp.totalFlowH - inp.H3; const H3=inp.H3; const H4=inp.H4;
-      const totalH = H1+H2+H3+H4;
       const G_ton = res.G/1000;
       const labT = inp.priceLabTemplate, labRebar=inp.priceLabRebar, labConc=inp.priceLabConc, labMason=inp.priceLabMasonry;
       const matRebar=inp.priceMatRebar, matConc=inp.priceMatConc, matBrick=inp.priceMatBrick;
       const machExc=inp.priceMachExc, machTrans=inp.priceMachTrans;
       const managePct = inp.manageRate/100;
-      const profitPct = inp.profitRate/100;
-      const taxPct = inp.taxRate/100;
       const laborCost = res.S*labT + G_ton*labRebar + res.V*labConc + res.Q*labMason;
       const materialCost = G_ton*matRebar + res.V*matConc + res.Q*matBrick;
       const machineCost = res.Vsoil*machExc + res.Vsoil*machTrans;
@@ -636,7 +568,7 @@
           <div class="detail-item"><span>圈梁高度</span><span>${H4.toFixed(2)} m</span></div><div class="detail-item"><span>圈梁壁厚</span><span>${inp.A4.toFixed(2)} m</span></div>
           <div class="detail-item"><span>底板厚度</span><span>${inp.B.toFixed(2)} m</span></div><div class="detail-item"><span>封底厚度</span><span>${inp.sealThick.toFixed(2)} m</span></div>
         </div></div>
-        <div class="detail-section"><h4>🔩 刃脚加宽段钢筋</h4><div class="detail-grid">
+        <div class="detail-section"><h4>🔩 刃脚钢筋</h4><div class="detail-grid">
           <div class="detail-item"><span>内侧水平筋直径/间距</span><span>${inp.φ1}mm / ${inp.L1}mm</span></div>
           <div class="detail-item"><span>外侧水平筋直径/间距</span><span>${inp.φ2}mm / ${inp.L2}mm</span></div>
           <div class="detail-item"><span>内侧站筋直径/间距</span><span>${inp.φ3}mm / ${inp.L3}mm</span></div>
@@ -647,18 +579,6 @@
           <div class="detail-item"><span>外侧水平筋直径/间距</span><span>${inp.φ6}mm / ${inp.L6}mm</span></div>
           <div class="detail-item"><span>内侧站筋直径/间距</span><span>${inp.φ7}mm / ${inp.L7}mm</span></div>
           <div class="detail-item"><span>外侧站筋直径/间距</span><span>${inp.φ8}mm / ${inp.L8}mm</span></div>
-        </div></div>
-        <div class="detail-section"><h4>🧱 标准段第二层</h4><div class="detail-grid">
-          <div class="detail-item"><span>内侧水平筋直径/间距</span><span>${inp.φ9}mm / ${inp.L9}mm</span></div>
-          <div class="detail-item"><span>外侧水平筋直径/间距</span><span>${inp.φ10}mm / ${inp.L10}mm</span></div>
-          <div class="detail-item"><span>内侧站筋直径/间距</span><span>${inp.φ11}mm / ${inp.L11}mm</span></div>
-          <div class="detail-item"><span>外侧站筋直径/间距</span><span>${inp.φ12}mm / ${inp.L12}mm</span></div>
-        </div></div>
-        <div class="detail-section"><h4>🧱 标准段第三层</h4><div class="detail-grid">
-          <div class="detail-item"><span>内侧水平筋直径/间距</span><span>${inp.φ13}mm / ${inp.L13}mm</span></div>
-          <div class="detail-item"><span>外侧水平筋直径/间距</span><span>${inp.φ14}mm / ${inp.L14}mm</span></div>
-          <div class="detail-item"><span>内侧站筋直径/间距</span><span>${inp.φ15}mm / ${inp.L15}mm</span></div>
-          <div class="detail-item"><span>外侧站筋直径/间距</span><span>${inp.φ16}mm / ${inp.L16}mm</span></div>
         </div></div>
         <div class="detail-section"><h4>🕸 底板 & 圈梁钢筋</h4><div class="detail-grid">
           <div class="detail-item"><span>上层水平筋/间距</span><span>${inp.φ17}mm / ${inp.L17}mm</span></div>
@@ -698,6 +618,31 @@
       `;
     }
 
+    function renderHistory(){
+      const records = loadRecords().reverse();
+      const container = document.getElementById('historyList');
+      container.innerHTML = records.map((r, idx)=>{
+        const inp = r.inputs; const res = r.results; const cfg = r.config;
+        const detailHtml = generateRecordDetailHtml(inp, res, cfg);
+        return `
+        <div class="record-item" data-id="${r.id}" onclick="toggleRecord(this, ${r.id})">
+          <div class="record-header">
+            <span class="record-index">${records.length - idx}</span>
+            <span class="record-title">${r.label} <span style="font-size:0.7rem;color:#557c9a;">${r.timestamp}</span></span>
+            <span class="menu-dots" onclick="event.stopPropagation();toggleMenu(${r.id})">⋯</span>
+          </div>
+          <div class="record-menu" id="menu-${r.id}">
+            <div class="menu-item" onclick="event.stopPropagation();renamePrompt(${r.id})">✏️ 重命名</div>
+            <div class="menu-item" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️ 删除</div>
+            <div class="menu-item" onclick="event.stopPropagation();copyRecordText(${r.id})">📋 复制全文</div>
+          </div>
+          <div class="record-detail hidden" id="detail-${r.id}">
+            ${detailHtml}
+          </div>
+        </div>
+      `}).join('');
+    }
+
     window.toggleRecord = function(el, id){
       el.classList.toggle('expanded');
       document.getElementById(`detail-${id}`).classList.toggle('hidden');
@@ -711,41 +656,16 @@
     function closeAllMenus(except){ document.querySelectorAll('.record-menu').forEach(m=>{ if(m.id!==`menu-${except}`) m.classList.remove('show'); }); }
     window.renamePrompt = function(id){ const newName = prompt('输入新名称', ''); if(newName) renameRecord(id, newName); closeAllMenus(); };
     window.deleteRecord = function(id){ if(confirm('确定删除？')) deleteRecord(id); closeAllMenus(); };
-    
-    window.exportRecordById = async function(id, type){
-      closeAllMenus();
+    window.copyRecordText = function(id){
       const rec = loadRecords().find(r=>r.id==id);
       if(!rec) return;
-      const detailDiv = document.createElement('div');
-      detailDiv.style.width = '600px';
-      detailDiv.style.padding = '20px';
-      detailDiv.style.background = '#f6faff';
-      detailDiv.style.borderRadius = '24px';
-      detailDiv.innerHTML = generateRecordDetailHtml(rec.inputs, rec.results, rec.config);
-      detailDiv.style.fontFamily = "'Segoe UI', Roboto, sans-serif";
-      
-      if(type === 'excel'){
-        const wb = XLSX.utils.book_new();
-        const data = [['字段','值']];
-        const flat = (obj, prefix='')=>{ Object.entries(obj).forEach(([k,v])=>{ if(v&&typeof v==='object') flat(v, prefix+k+'.'); else data.push([prefix+k, v]); }); };
-        flat(rec);
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, '记录');
-        XLSX.writeFile(wb, `沉井记录_${id}.xlsx`);
-      } else if(type === 'pdf'){
-        const canvas = await html2canvas(detailDiv, {scale:2, backgroundColor:'#f6faff'});
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({orientation:'portrait', unit:'px', format:[canvas.width, canvas.height]});
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`沉井记录_${id}.pdf`);
-      } else if(type === 'png'){
-        const canvas = await html2canvas(detailDiv, {scale:2, backgroundColor:'#f6faff'});
-        const link = document.createElement('a');
-        link.download = `沉井记录_${id}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-      }
+      const text = generateRecordText(rec);
+      navigator.clipboard?.writeText(text).then(()=>{
+        alert('记录已复制到剪贴板');
+      }).catch(()=>{
+        prompt('请手动复制以下内容', text);
+      });
+      closeAllMenus();
     };
 
     function restoreLast(){
@@ -759,18 +679,20 @@
     const overlay=document.getElementById('settingsOverlay');
     document.getElementById('openSettingsBtn').onclick=()=>{ overlay.classList.add('active'); renderHistory(); };
     document.getElementById('closeSettingsBtn').onclick=()=>{ overlay.classList.remove('active'); lockSettings(); };
+    
     function lockSettings(){
       unlocked=false;
       document.getElementById('lockPanel').classList.remove('hidden');
       document.getElementById('settingsContent').classList.add('hidden');
-      ['kLen','protect','lapFactor','brickL','brickW','brickH','lossRate'].forEach(id=> document.getElementById(id).disabled=true);
+      ['barLength','kLen','protect','lapFactor','brickL','brickW','brickH','lossRate'].forEach(id=> document.getElementById(id).disabled=true);
       document.getElementById('pwdInput').value='';
     }
     function unlockSettings(){
       unlocked=true;
       document.getElementById('lockPanel').classList.add('hidden');
       document.getElementById('settingsContent').classList.remove('hidden');
-      ['kLen','protect','lapFactor','brickL','brickW','brickH','lossRate'].forEach(id=> document.getElementById(id).disabled=false);
+      ['barLength','kLen','protect','lapFactor','brickL','brickW','brickH','lossRate'].forEach(id=> document.getElementById(id).disabled=false);
+      document.getElementById('barLength').value = config.barLength;
       document.getElementById('kLen').value=config.kLen; document.getElementById('protect').value=config.protect;
       document.getElementById('lapFactor').value=config.lapFactor; document.getElementById('brickL').value=config.brick[0];
       document.getElementById('brickW').value=config.brick[1]; document.getElementById('brickH').value=config.brick[2];
@@ -779,12 +701,14 @@
     document.getElementById('unlockBtn').onclick=()=>{ if(document.getElementById('pwdInput').value==='000000') unlockSettings(); else alert('密码错误'); };
     document.getElementById('applySettingsBtn').onclick=()=>{
       if(!unlocked) return;
+      config.barLength = parseFloat(document.getElementById('barLength').value);
       config.kLen=parseFloat(document.getElementById('kLen').value); config.protect=parseFloat(document.getElementById('protect').value);
       config.lapFactor=parseFloat(document.getElementById('lapFactor').value); config.brick=[parseFloat(document.getElementById('brickL').value), parseFloat(document.getElementById('brickW').value), parseFloat(document.getElementById('brickH').value)];
       config.lossRate=parseFloat(document.getElementById('lossRate').value);
       lockSettings(); overlay.classList.remove('active'); compute(true);
     };
     lockSettings();
+    
     document.getElementById('calculateBtn').addEventListener('click', ()=>compute(true));
     syncH2(); restoreLast();
   })();
