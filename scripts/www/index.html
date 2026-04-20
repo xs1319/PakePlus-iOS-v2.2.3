@@ -21,7 +21,10 @@
     body { background: var(--bg); color: var(--text-main); min-height: 100vh; position: relative; -webkit-tap-highlight-color: transparent; }
     
     .app-wrapper { max-width: 100%; margin: 0 auto; background: var(--card-bg); min-height: 100vh; position: relative; }
-    .header { padding: 20px 20px 8px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    
+    /* 修复1：将顶部标题栏改为纯白实色，增加安全区顶部适配，提高 z-index 防止穿透 */
+    .header { padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 8px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; background: #ffffff; border-bottom: 1px solid var(--border); }
+    
     h1 { font-weight: 600; font-size: 1.6rem; color: #0f3b5e; }
     .settings-icon { font-size: 24px; background: #eef3fa; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--primary); border: 1px solid #cbdae6; }
     
@@ -227,7 +230,7 @@
   </div>
   <div class="modal-body">
     <div id="lockPanel">
-      <div style="background:#fef1e6; padding:14px; border-radius:16px; margin-bottom:12px; color:#d32f2f; font-weight:bold;">🔐 验证密码</div>
+      <div style="background:#fef1e6; padding:14px; border-radius:16px; margin-bottom:12px; color:#d32f2f; font-weight:bold;">🔐 高级参数修改需验证密码</div>
       <div style="display:flex; gap:8px;">
         <input type="password" id="pwdInput" placeholder="输入密码(000000)" style="flex:1; padding:12px 16px; border-radius:20px; border:1px solid #ccc; font-size:1rem; outline:none;">
         <button id="unlockBtn" style="padding:0 24px; border-radius:20px; background:var(--primary); color:white; border:none; font-weight:bold; cursor:pointer;">解锁</button>
@@ -568,7 +571,19 @@
       titleEl.innerText = title; bodyEl.innerHTML = legend + html; document.body.classList.add('modal-open'); modal.classList.add('active');
     };
 
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); document.body.classList.remove('modal-open'); };
+    window.closeModal = function(id) { 
+      document.getElementById(id).classList.remove('active'); 
+      document.body.classList.remove('modal-open'); 
+      // 退出设置页时执行强制锁死
+      if(id === 'settingsOverlay') {
+        unlocked = false;
+        document.getElementById('pwdInput').value = '';
+        document.getElementById('lockPanel').classList.remove('hidden');
+        document.getElementById('historySection').classList.remove('hidden');
+        document.getElementById('settingsContent').classList.add('hidden');
+        ['barLength','lossRate','kLen','lapFactor','protect','brickL','brickW','brickH'].forEach(inpId => document.getElementById(inpId).disabled = true);
+      }
+    };
 
     // ========== 历史记录引擎与 UI ==========
     function loadRecords(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -584,11 +599,9 @@
       
       container.innerHTML = records.map((r, idx)=>{
         const inp = r.inputs, res = r.results;
-        // 计算标准段有多少层以供渲染
         const H2_m = inp.totalFlowH - inp.H3;
         const layers = H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1;
         
-        // 动态生成标准段钢筋记录
         let layerHtml = '';
         for(let i=1; i<=layers; i++){
           const bp = 5+(i-1)*4;
