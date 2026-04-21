@@ -16,14 +16,37 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif; }
     
-    /* 基础锁定 */
+    /* 基础锁定与底色修复 */
+    html { background-color: #ffffff; } 
     body.modal-open { overflow: hidden; height: 100vh; }
     body { background: var(--bg); color: var(--text-main); min-height: 100vh; position: relative; -webkit-tap-highlight-color: transparent; }
     
+    /* 核心修复：iPhone 顶部安全区全局物理遮罩，彻底杜绝刘海区域变透明及文字穿透 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top, 0px);
+      background-color: #ffffff;
+      z-index: 99999; 
+      pointer-events: none; 
+    }
+    
     .app-wrapper { max-width: 100%; margin: 0 auto; background: var(--card-bg); min-height: 100vh; position: relative; }
     
-    /* 修复1：取消吸顶(sticky)，让标题自然跟随页面滑动，彻底杜绝重影透底 */
-    .header { padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 8px; display: flex; align-items: center; justify-content: space-between; position: relative; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+    /* 修复：为主标题栏增加 translateZ(0) 开启硬件加速图层，防止文字透视 */
+    .header { 
+      padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 8px; 
+      display: flex; align-items: center; justify-content: space-between; 
+      position: sticky; top: 0; z-index: 50; 
+      background: #ffffff; 
+      border-bottom: 1px solid var(--border); 
+      transform: translateZ(0); 
+      -webkit-transform: translateZ(0);
+    }
+    
     h1 { font-weight: 600; font-size: 1.6rem; color: #0f3b5e; }
     .settings-icon { font-size: 24px; background: #eef3fa; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--primary); border: 1px solid #cbdae6; }
     
@@ -72,14 +95,25 @@
     .blue-bold { color: var(--primary); font-weight: 700; font-size: 1.2rem; }
     .red-large { color: #d32f2f; font-weight: 800; font-size: 1.4rem; }
     
-    /* 修复2：全屏详单弹窗改为整体滚动，头部随内容一起滑动，防止头部透明遮挡问题 */
-    .full-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f7f9fc; z-index: 1000; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); display: block; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    /* 全屏详单弹窗 */
+    .full-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f7f9fc; z-index: 1000; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; }
     .full-modal.active { transform: translateY(0); }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; background: white; border-bottom: 1px solid #e1ebf4; position: relative; }
+    
+    /* 修复：为弹窗的标题栏也增加 translateZ(0) 隔离滚动层 */
+    .modal-header { 
+      display: flex; align-items: center; justify-content: space-between; 
+      padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; 
+      background: #ffffff; 
+      border-bottom: 1px solid #e1ebf4; box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+      z-index: 10; 
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
     .modal-title { font-weight: 700; font-size: 1.15rem; color: #0f3b5e; }
     .btn-icon { background: #eaf1f8; border: none; width: 40px; height: 40px; border-radius: 20px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: bold; cursor: pointer; }
     .btn-text { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    .modal-body { padding: 16px; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .modal-body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
     
     /* 详单内部样式 */
     .legend-box { background: #eef4fa; border: 1px dashed #a4c2d9; border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #4a6c8a; }
@@ -384,25 +418,25 @@
       // 1. 模板
       const tData = globalCalcData.template; let S = 0;
       const tB_in = PI*D_m*H1_m; const tB_out = PI*(D_m+2*A1_m)*H1_m; S+=tB_in+tB_out;
-      tData.push({ part:'刃脚段', formula: `内侧: π×${D_m.toFixed(2)}×${H1_m.toFixed(2)} = ${tB_in.toFixed(2)}<br>外侧: π×(${D_m.toFixed(2)}+2×${A1_m.toFixed(2)})×${H1_m.toFixed(2)} = ${tB_out.toFixed(2)}`, res: (tB_in+tB_out).toFixed(2) });
+      tData.push({ part:'刃脚段', formula: `说明: (内侧: π×内径D×高H1) + (外侧: π×外径(D+2×厚A1)×高H1)<br>公式: (π×${D_m.toFixed(2)}×${H1_m.toFixed(2)}) + (π×${(D_m+2*A1_m).toFixed(2)}×${H1_m.toFixed(2)})`, res: (tB_in+tB_out).toFixed(2) });
       const tS_in = PI*D_m*H2_m; const tS_out = PI*(D_m+2*A2_m)*H2_m; S+=tS_in+tS_out;
-      tData.push({ part:'标准砼段', formula: `内侧: π×${D_m.toFixed(2)}×${H2_m.toFixed(2)} = ${tS_in.toFixed(2)}<br>外侧: π×(${D_m.toFixed(2)}+2×${A2_m.toFixed(2)})×${H2_m.toFixed(2)} = ${tS_out.toFixed(2)}`, res: (tS_in+tS_out).toFixed(2) });
+      tData.push({ part:'标准砼段', formula: `说明: (内侧: π×内径D×高H2) + (外侧: π×外径(D+2×厚A2)×高H2)<br>公式: (π×${D_m.toFixed(2)}×${H2_m.toFixed(2)}) + (π×${(D_m+2*A2_m).toFixed(2)}×${H2_m.toFixed(2)})`, res: (tS_in+tS_out).toFixed(2) });
       const tR_in = PI*D_m*H4_m; const tR_out = PI*(D_m+2*A4_m)*H4_m; S+=tR_in+tR_out;
-      tData.push({ part:'锁口圈梁', formula: `内侧: π×${D_m.toFixed(2)}×${H4_m.toFixed(2)} = ${tR_in.toFixed(2)}<br>外侧: π×(${D_m.toFixed(2)}+2×${A4_m.toFixed(2)})×${H4_m.toFixed(2)} = ${tR_out.toFixed(2)}`, res: (tR_in+tR_out).toFixed(2) });
+      tData.push({ part:'锁口圈梁', formula: `说明: (内侧: π×内径D×高H4) + (外侧: π×外径(D+2×厚A4)×高H4)<br>公式: (π×${D_m.toFixed(2)}×${H4_m.toFixed(2)}) + (π×${(D_m+2*A4_m).toFixed(2)}×${H4_m.toFixed(2)})`, res: (tR_in+tR_out).toFixed(2) });
       tData.total = S.toFixed(2);
 
       // 2. 混凝土
       const cData = globalCalcData.concrete; let V = 0;
       const vB = PI*H1_m*A1_m*(D_m+A1_m); V+=vB;
-      cData.push({ part:'刃脚段', formula: `π×${H1_m.toFixed(2)}×${A1_m.toFixed(2)}×(${D_m.toFixed(2)}+${A1_m.toFixed(2)})`, res: vB.toFixed(2) });
+      cData.push({ part:'刃脚段', formula: `说明: 圆环体积 = π × 高H1 × 壁厚A1 × (内径D + 壁厚A1)<br>公式: π×${H1_m.toFixed(2)}×${A1_m.toFixed(2)}×(${D_m.toFixed(2)}+${A1_m.toFixed(2)})`, res: vB.toFixed(2) });
       const vS = PI*H2_m*A2_m*(D_m+A2_m); V+=vS;
-      cData.push({ part:'标准砼段', formula: `π×${H2_m.toFixed(2)}×${A2_m.toFixed(2)}×(${D_m.toFixed(2)}+${A2_m.toFixed(2)})`, res: vS.toFixed(2) });
+      cData.push({ part:'标准砼段', formula: `说明: 圆环体积 = π × 高H2 × 壁厚A2 × (内径D + 壁厚A2)<br>公式: π×${H2_m.toFixed(2)}×${A2_m.toFixed(2)}×(${D_m.toFixed(2)}+${A2_m.toFixed(2)})`, res: vS.toFixed(2) });
       const vSeal = PI*(D_m/2)*(D_m/2)*seal_m; V+=vSeal;
-      cData.push({ part:'封底', formula: `π×(${D_m.toFixed(2)}/2)²×${seal_m.toFixed(2)}`, res: vSeal.toFixed(2) });
+      cData.push({ part:'封底', formula: `说明: 圆柱体积 = π × (内径D/2)² × 封底厚Hs<br>公式: π×(${D_m.toFixed(2)}/2)²×${seal_m.toFixed(2)}`, res: vSeal.toFixed(2) });
       const vSlab = PI*(D_m/2)*(D_m/2)*B_m; V+=vSlab;
-      cData.push({ part:'底板', formula: `π×(${D_m.toFixed(2)}/2)²×${B_m.toFixed(2)}`, res: vSlab.toFixed(2) });
+      cData.push({ part:'底板', formula: `说明: 圆柱体积 = π × (内径D/2)² × 底板厚B<br>公式: π×(${D_m.toFixed(2)}/2)²×${B_m.toFixed(2)}`, res: vSlab.toFixed(2) });
       const vRB = PI*H4_m*A4_m*(D_m+A4_m); V+=vRB;
-      cData.push({ part:'锁口圈梁', formula: `π×${H4_m.toFixed(2)}×${A4_m.toFixed(2)}×(${D_m.toFixed(2)}+${A4_m.toFixed(2)})`, res: vRB.toFixed(2) });
+      cData.push({ part:'锁口圈梁', formula: `说明: 圆环体积 = π × 高H4 × 壁厚A4 × (内径D + 壁厚A4)<br>公式: π×${H4_m.toFixed(2)}×${A4_m.toFixed(2)}×(${D_m.toFixed(2)}+${A4_m.toFixed(2)})`, res: vRB.toFixed(2) });
       cData.total = V.toFixed(2);
 
       // 3. 砖砌体
@@ -410,18 +444,19 @@
       const brickVol = PI*H3_m*A3_m*(D_m+A3_m);
       const unitVol = (config.brick[0]+0.005)*(config.brick[1])*(config.brick[2]+0.005);
       const Q = Math.ceil(brickVol / unitVol);
-      mData.push({ part:'墙体总体积', formula: `π×${H3_m.toFixed(2)}×${A3_m.toFixed(2)}×(${D_m.toFixed(2)}+${A3_m.toFixed(2)})`, res: brickVol.toFixed(3)+' m³' });
-      mData.push({ part:'单砖含灰缝体积', formula: `(${config.brick[0]}+0.005) × ${config.brick[1]} × (${config.brick[2]}+0.005)`, res: unitVol.toFixed(5)+' m³' });
+      mData.push({ part:'墙体总体积', formula: `说明: 砖墙圆环体积 = π × 高H3 × 壁厚A3 × (内径D + 壁厚A3)<br>公式: π×${H3_m.toFixed(2)}×${A3_m.toFixed(2)}×(${D_m.toFixed(2)}+${A3_m.toFixed(2)})`, res: brickVol.toFixed(3) + ' m³' });
+      mData.push({ part:'单砖含灰缝体积', formula: `说明: 单块灰砖体积 = (长+灰缝) × 宽 × (高+灰缝)<br>公式: (${config.brick[0]}+0.005) × ${config.brick[1]} × (${config.brick[2]}+0.005)`, res: unitVol.toFixed(5) + ' m³' });
+      mData.push({ part:'所需砖块数量', formula: `说明: 砖块总数 = 墙体总体积 ÷ 单砖含灰缝体积 (向上取整)<br>公式: ${brickVol.toFixed(3)} ÷ ${unitVol.toFixed(5)}`, res: Q + ' 块' });
       mData.total = Q;
 
       // 4. 土方
       const eData = globalCalcData.earthwork;
       const Vsoil = PI * Math.pow((D_m+2*A1_m)/2, 2) * (H1_m+H2_m+H3_m);
-      eData.push({ part:'开挖边界', formula: `直径(按外径): ${D_m.toFixed(2)}+2×${A1_m.toFixed(2)} = ${(D_m+2*A1_m).toFixed(2)}<br>深度(扣除圈梁): ${H1_m.toFixed(2)}+${H2_m.toFixed(2)}+${H3_m.toFixed(2)} = ${(H1_m+H2_m+H3_m).toFixed(2)}`, res: '' });
-      eData.push({ part:'体积计算', formula: `π × R² × H`, res: Vsoil.toFixed(2) });
+      eData.push({ part:'开挖边界', formula: `说明: 外径 = 内径D + 2×刃脚厚A1, 总深 = 刃脚H1+标段H2+砖墙H3<br>公式: 外径=${D_m.toFixed(2)}+2×${A1_m.toFixed(2)}, 总深=${H1_m.toFixed(2)}+${H2_m.toFixed(2)}+${H3_m.toFixed(2)}`, res: '' });
+      eData.push({ part:'体积计算', formula: `说明: 基坑圆柱体积 = π × (外径/2)² × 总深<br>公式: π × (${((D_m+2*A1_m)/2).toFixed(2)})² × ${(H1_m+H2_m+H3_m).toFixed(2)}`, res: Vsoil.toFixed(2) });
       eData.total = Vsoil.toFixed(2);
 
-      // 5. 钢筋
+      // 5. 钢筋 
       const rData = globalCalcData.rebar; const rSum = globalCalcData.rebarSum; const coeff = 0.00617; let totalRebarKg = 0;
       function logR(part, d, sp, isHorz, hOrD, diaC) {
         if(!d || !hOrD) return;
@@ -429,16 +464,20 @@
         if(isHorz) {
           const n = Math.ceil(hOrD / sp + 1); const cLen = PI * diaC; const splices = Math.ceil(cLen / config.barLength);
           const lap = config.lapFactor * d / 1000; const tLap = splices * lap * n;
-          w = coeff * d * d * (cLen * n + tLap); fStr = `圈长${cLen.toFixed(2)}×${n}圈 + 搭接${tLap.toFixed(2)}m`;
+          w = coeff * d * d * (cLen * n + tLap); 
+          fStr = `说明: 长度=(圈长×圈数+总搭接), 重量=0.00617×直径²×长度<br>公式: 长度=(${cLen.toFixed(2)}×${n}+${tLap.toFixed(2)}), 重量=0.00617×${d}²×(${cLen.toFixed(2)}×${n}+${tLap.toFixed(2)})`;
         } else {
-          const n = Math.ceil(PI * diaC / sp); w = coeff * d * d * (hOrD * n); fStr = `高${hOrD.toFixed(2)}×${n}根`;
+          const n = Math.ceil(PI * diaC / sp); w = coeff * d * d * (hOrD * n); 
+          fStr = `说明: 长度=(单根长×根数), 重量=0.00617×直径²×长度<br>公式: 长度=(${hOrD.toFixed(2)}×${n}), 重量=0.00617×${d}²×(${hOrD.toFixed(2)}×${n})`;
         }
         rData.push({ part: `${part} (Φ${d})`, formula: fStr, res: w.toFixed(1) }); rSum[d] = (rSum[d]||0) + w; totalRebarKg += w;
       }
       function logLap(part, d, sp, diaC) {
         if(!d) return;
         const n = Math.ceil(PI * diaC / sp); const lap = config.lapFactor * d / 1000; const w = coeff * d * d * (lap * n);
-        rData.push({ part: `${part}搭接 (Φ${d})`, formula: `长${lap.toFixed(2)}×${n}处`, res: w.toFixed(1) }); rSum[d] = (rSum[d]||0) + w; totalRebarKg += w;
+        // 修改了处的描述为根
+        const fStr = `说明: 长度=(单根搭接长×根数), 重量=0.00617×直径²×长度<br>公式: 长度=(${lap.toFixed(2)}×${n}), 重量=0.00617×${d}²×(${lap.toFixed(2)}×${n})`;
+        rData.push({ part: `${part}搭接 (Φ${d})`, formula: fStr, res: w.toFixed(1) }); rSum[d] = (rSum[d]||0) + w; totalRebarKg += w;
       }
 
       const pM = config.protect/1000; const dIn = D_m + 2*pM, dOut1 = D_m + 2*A1_m - 2*pM, dOut2 = D_m + 2*A2_m - 2*pM;
@@ -459,13 +498,16 @@
       ['17','18','19','20'].forEach((id, idx)=>{
         const names = ['底板上水平','底板上纵筋','底板下水平','底板下纵筋']; const d = v(`φ${id}`), sp = v(`L${id}`)/1000;
         if(!d) return; const n = Math.ceil(D_m/sp); const w = coeff*d*d*single*n;
-        rData.push({ part: `${names[idx]} (Φ${d})`, formula: `长${single.toFixed(2)}×${n}根`, res: w.toFixed(1) }); rSum[d] = (rSum[d]||0) + w; totalRebarKg += w;
+        const fStr = `说明: 长度=(单根长×根数), 重量=0.00617×直径²×长度<br>公式: 长度=(${single.toFixed(2)}×${n}), 重量=0.00617×${d}²×(${single.toFixed(2)}×${n})`;
+        rData.push({ part: `${names[idx]} (Φ${d})`, formula: fStr, res: w.toFixed(1) }); rSum[d] = (rSum[d]||0) + w; totalRebarKg += w;
       });
       
       const rbD = v('φ21'), rbC = v('C');
       if(rbD) {
-        const w = coeff*rbD*rbD*(rbC*PI*(D_m+A4_m));
-        rData.push({ part: `圈梁环筋 (Φ${rbD})`, formula: `${rbC}根×圈长${(PI*(D_m+A4_m)).toFixed(2)}`, res: w.toFixed(1) }); rSum[rbD] = (rSum[rbD]||0) + w; totalRebarKg += w;
+        const cLen = PI*(D_m+A4_m);
+        const w = coeff*rbD*rbD*(rbC*cLen);
+        const fStr = `说明: 长度=(圈梁环筋根数×圈长), 重量=0.00617×直径²×长度<br>公式: 长度=(${rbC}×${cLen.toFixed(2)}), 重量=0.00617×${rbD}²×(${rbC}×${cLen.toFixed(2)})`;
+        rData.push({ part: `圈梁环筋 (Φ${rbD})`, formula: fStr, res: w.toFixed(1) }); rSum[rbD] = (rSum[rbD]||0) + w; totalRebarKg += w;
       }
       
       const lossMultiplier = (1 + config.lossRate/100); totalRebarKg *= lossMultiplier;
@@ -556,12 +598,14 @@
       }
       else if(type === 'earthwork') {
         title = '土方工程量明细'; legend = basicLegend;
-        html = globalCalcData.earthwork.map(item => `<div class="detail-block"><div class="d-title">${item.part}</div><div class="d-row formula">${formatMath(item.formula)}</div><div class="d-sum">${item.res ? item.res+' m³' : '推导参数'}</div></div>`).join('');
+        html = globalCalcData.earthwork.map(item => `<div class="detail-block"><div class="d-title">${item.part}</div><div class="d-row formula">${formatMath(item.formula)}</div><div class="d-sum">${item.res ? item.res+' m³' : ''}</div></div>`).join('');
         html += `<div class="grand-total">土方合计用量 <strong>${globalCalcData.earthwork.total} m³</strong></div>`;
       }
       else if(type === 'rebar') {
-        title = '钢筋工程量明细'; legend = `<div class="legend-box"><strong>说明：</strong>已计入损耗率 ${config.lossRate}%。<br>搭接计入方式：纵筋层间单次计入；环向依原材长度(${config.barLength}m)闭环计算。</div>`;
-        html = globalCalcData.rebar.map(item => `<div class="detail-block" style="padding:10px 14px;"><div class="d-title" style="margin-bottom:4px; font-size:0.9rem;">${item.part}</div><div style="display:flex; justify-content:space-between; align-items:flex-end;"><span style="font-size:0.75rem; color:#6b8aa8;">${item.formula}</span><span style="font-weight:600; color:#1a5f8d;">${item.res} kg</span></div></div>`).join('');
+        title = '钢筋工程量明细'; 
+        legend = `<div class="legend-box"><strong>符号说明：</strong><br>0.00617: 钢筋理论重量系数(kg/m/mm²)<br>D: 内径(m) &nbsp; L: 间距(m)<br><strong>计算规则：</strong><br>已计入损耗率 ${config.lossRate}%。<br>纵向钢筋搭接层间单次计入；环向依原材长(${config.barLength}m)闭环计算。</div>`;
+        html = globalCalcData.rebar.map(item => `<div class="detail-block"><div class="d-title">${item.part}</div><div class="d-row formula">${formatMath(item.formula)}</div><div class="d-sum">${item.res} kg</div></div>`).join('');
+        
         let sumHtml = '<div style="margin-top:20px; padding:16px; background:white; border-radius:16px; border:2px solid #1e5780;"><div style="font-weight:700; color:#1e5780; margin-bottom:12px; border-bottom:1px solid #d2e0ee; padding-bottom:8px;">⚖️ 各型号最终合计 (含损耗)</div>';
         for(let d in globalCalcData.rebarSum) sumHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.95rem;"><span>Φ${d} 钢筋：</span><strong>${(globalCalcData.rebarSum[d]/1000).toFixed(3)} t</strong></div>`;
         sumHtml += `</div><div class="grand-total">总计钢筋用量 <strong>${(globalCalcData.rebar.total/1000).toFixed(3)} t</strong></div>`;
@@ -573,7 +617,6 @@
     window.closeModal = function(id) { 
       document.getElementById(id).classList.remove('active'); 
       document.body.classList.remove('modal-open'); 
-      // 修复2：退出设置页时执行强制锁死，重新进入需再次验证密码
       if(id === 'settingsOverlay') {
         unlocked = false;
         document.getElementById('pwdInput').value = '';
@@ -748,7 +791,6 @@
       closeDeleteModal();
     }
 
-    // 全量级复制引擎
     function generateAndCopyRecord(id) {
       const rec = loadRecords().find(r=>r.id==id); if(!rec) return;
       const inp = rec.inputs, res = rec.results;
@@ -758,7 +800,7 @@
       let layerText = '';
       for(let i=1; i<=layers; i++){
         const bp = 5+(i-1)*4;
-        layerText += `  [第${i}层] 内水平 Φ${inp[`φ${bp}`]}@${inp[`L${bp}`]} | 外水平 Φ${inp[`φ${bp+1}`]}@${inp[`L${bp+1}`]} | 内站筋 Φ${inp[`φ${bp+2}`]}@${inp[`L${bp+2}`]} | 外站筋 Φ${inp[`φ${bp+3}`]}@${inp[`L${bp+3}`]}\n`;
+        layerText += `  [第${i}层]\n  内水平： Φ${inp[`φ${bp}`]}@${inp[`L${bp}`]} | 外水平： Φ${inp[`φ${bp+1}`]}@${inp[`L${bp+1}`]}\n  内站筋： Φ${inp[`φ${bp+2}`]}@${inp[`L${bp+2}`]} | 外站筋： Φ${inp[`φ${bp+3}`]}@${inp[`L${bp+3}`]}\n\n`;
       }
 
       const text = `【计算记录】${rec.label} (${rec.timestamp})
@@ -766,75 +808,82 @@
 ===================
 一、基础信息 & 尺寸
 ===================
-沉井内径: ${inp.D.toFixed(2)}m
-流水面总高: ${inp.totalFlowH.toFixed(2)}m
-标准段高度: ${H2_m.toFixed(2)}m
-砖砌体高度: ${inp.H3.toFixed(2)}m
-刃脚高度: ${inp.H1.toFixed(2)}m
-刃脚壁厚: ${inp.A1.toFixed(2)}m
-标段壁厚: ${inp.A2.toFixed(2)}m
-砖墙壁厚: ${inp.A3.toFixed(2)}m
-圈梁高度: ${inp.H4.toFixed(2)}m
-圈梁壁厚: ${inp.A4.toFixed(2)}m
-底板厚度: ${inp.B.toFixed(2)}m
-封底厚度: ${inp.sealThick.toFixed(2)}m
+沉井内径： ${inp.D.toFixed(2)}m
+流水面总高： ${inp.totalFlowH.toFixed(2)}m
+标准段高度： ${H2_m.toFixed(2)}m
+砖砌体高度： ${inp.H3.toFixed(2)}m
+刃脚高度： ${inp.H1.toFixed(2)}m
+刃脚壁厚： ${inp.A1.toFixed(2)}m
+标段壁厚： ${inp.A2.toFixed(2)}m
+砖墙壁厚： ${inp.A3.toFixed(2)}m
+圈梁高度： ${inp.H4.toFixed(2)}m
+圈梁壁厚： ${inp.A4.toFixed(2)}m
+底板厚度： ${inp.B.toFixed(2)}m
+封底厚度： ${inp.sealThick.toFixed(2)}m
 
 ===================
 二、钢筋配置明细
 ===================
 【刃脚段】
-  内水平 Φ${inp.φ1}@${inp.L1} | 外水平 Φ${inp.φ2}@${inp.L2}
-  内站筋 Φ${inp.φ3}@${inp.L3} | 外站筋 Φ${inp.φ4}@${inp.L4}
+  内水平： Φ${inp.φ1}@${inp.L1} | 外水平： Φ${inp.φ2}@${inp.L2}
+  内站筋： Φ${inp.φ3}@${inp.L3} | 外站筋： Φ${inp.φ4}@${inp.L4}
+
 【标准段】
 ${layerText}【底板及圈梁】
-  底板上水平 Φ${inp.φ17}@${inp.L17}
-  底板上纵筋 Φ${inp.φ18}@${inp.L18}
-  底板下水平 Φ${inp.φ19}@${inp.L19}
-  底板下纵筋 Φ${inp.φ20}@${inp.L20}
-  圈梁环筋 ${inp.C}根 Φ${inp.φ21}
+  底板上水平： Φ${inp.φ17}@${inp.L17}
+  底板上纵筋： Φ${inp.φ18}@${inp.L18}
+  底板下水平： Φ${inp.φ19}@${inp.L19}
+  底板下纵筋： Φ${inp.φ20}@${inp.L20}
+  圈梁环筋： ${inp.C}根 Φ${inp.φ21}
 
 ===================
 三、单价 & 费率
 ===================
-【人工】模板 ${inp.priceLabTemplate}元/m² | 钢筋 ${inp.priceLabRebar}元/t | 砼 ${inp.priceLabConc}元/m³ | 砌体 ${inp.priceLabMasonry}元/块
-【材料】钢筋 ${inp.priceMatRebar}元/t | 砼 ${inp.priceMatConc}元/m³ | 砖 ${inp.priceMatBrick}元/块
-【机械】长臂挖机 ${inp.priceMachExc}元/m³ | 土方外运 ${inp.priceMachTrans}元/m³
-【费率】管理费 ${inp.manageRate}% | 利润 ${inp.profitRate}% | 税率 ${inp.taxRate}%
+【人工】模板： ${inp.priceLabTemplate}元/m² | 钢筋： ${inp.priceLabRebar}元/t | 砼： ${inp.priceLabConc}元/m³ | 砌体： ${inp.priceLabMasonry}元/块
+【材料】钢筋： ${inp.priceMatRebar}元/t | 砼： ${inp.priceMatConc}元/m³ | 砖： ${inp.priceMatBrick}元/块
+【机械】长臂挖机： ${inp.priceMachExc}元/m³ | 土方外运： ${inp.priceMachTrans}元/m³
+【费率】管理费： ${inp.manageRate}% | 利润： ${inp.profitRate}% | 税率： ${inp.taxRate}%
 
 ===================
 四、工程量统计
 ===================
-模板: ${res.S.toFixed(2)} m²
-钢筋: ${Math.round(res.G)} kg
-混凝土: ${res.V.toFixed(2)} m³
-砖砌体: ${res.Q} 块
-土方: ${res.Vsoil.toFixed(2)} m³
+模板： ${res.S.toFixed(2)} m²
+钢筋： ${Math.round(res.G)} kg
+混凝土： ${res.V.toFixed(2)} m³
+砖砌体： ${res.Q} 块
+土方： ${res.Vsoil.toFixed(2)} m³
 
 ===================
 五、费用明细统计
 ===================
-人工费: ${res.labCost?.toFixed(2)} 元
-材料费: ${res.matCost?.toFixed(2)} 元
-机械费: ${res.machCost?.toFixed(2)} 元
-管理费: ${res.mgmtCost?.toFixed(2)} 元
+人工费： ${res.labCost?.toFixed(2)} 元
+材料费： ${res.matCost?.toFixed(2)} 元
+机械费： ${res.machCost?.toFixed(2)} 元
+管理费： ${res.mgmtCost?.toFixed(2)} 元
 -------------------
-直接成本: ${res.costTotal.toFixed(2)} 元
-含利润总价: ${res.profitTotal.toFixed(2)} 元
-含税总价: ${res.taxTotal.toFixed(2)} 元
+直接成本： ${res.costTotal.toFixed(2)} 元
+含利润总价： ${res.profitTotal.toFixed(2)} 元
+含税总价： ${res.taxTotal.toFixed(2)} 元
 `;
       executeFallbackCopy(text);
     }
 
-    // ========== 统一防屏蔽复制函数 ==========
     window.copyModalData = function() {
       const type = window.currentModalType;
       let text = `【${document.getElementById('detailModalTitle').innerText}】\n\n`;
       const data = globalCalcData[type];
+      
       if(type !== 'rebar') {
-        data.forEach(item => { text += `[${item.part}]\n推导: ${item.formula.replace(/<br>/g, ' | ')}\n结果: ${item.res}\n\n`; });
+        data.forEach(item => { 
+          text += `[${item.part}]\n${item.formula.replace(/<br>/g, '\n')}\n`;
+          if (item.res) text += `结果: ${item.res}\n\n`;
+          else text += `\n`;
+        });
         text += `★ 合计用量: ${data.total}\n`;
       } else {
-        data.forEach(item => { text += `- ${item.part}: ${item.res}kg (${item.formula})\n`; });
+        data.forEach(item => { 
+          text += `[${item.part}]\n${item.formula.replace(/<br>/g, '\n')}\n结果: ${item.res} kg\n\n`; 
+        });
         text += `\n【型号汇总(t)】\n`;
         for(let d in globalCalcData.rebarSum) text += `Φ${d}: ${(globalCalcData.rebarSum[d]/1000).toFixed(3)} t\n`;
         text += `★ 钢筋总计: ${(data.total/1000).toFixed(3)} t\n`;
@@ -854,7 +903,6 @@ ${layerText}【底板及圈梁】
       document.body.removeChild(textArea);
     }
 
-    // ========== 设置弹窗全屏交互 ==========
     document.getElementById('openSettingsBtn').onclick = () => { 
       document.body.classList.add('modal-open'); 
       document.getElementById('settingsOverlay').classList.add('active'); 
