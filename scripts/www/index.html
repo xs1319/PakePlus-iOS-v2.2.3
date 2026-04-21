@@ -209,7 +209,6 @@
           <div class="input-item"><label>流水面总高度(m)</label><input id="totalFlowH" type="number" step="0.01" value="6.80"></div>
           <div class="input-item"><label>砖砌体高度 H3(m)</label><input id="H3" type="number" step="0.01" value="0.80"></div>
           <div class="input-item"><label>标准段高度 H2(m)</label><input id="H2" type="number" readonly disabled></div>
-          <div class="input-item"><label>分段层数(层)</label><input id="autoLayers" type="number" step="1" value="1" min="1"></div>
         </div>
       </div>
       
@@ -364,7 +363,6 @@
     const totalFlowH=()=>parseFloat(document.getElementById('totalFlowH').value)||0;
     const H3=()=>parseFloat(document.getElementById('H3').value)||0;
     const H2_input=document.getElementById('H2');
-    const autoLayersInput=document.getElementById('autoLayers');
 
     // ====== 初始化音频上下文 (用于合成敲击声) ======
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -398,15 +396,12 @@
       let h2 = totalFlowH() - H3(); 
       if(h2 < 0) h2 = 0; 
       H2_input.value = h2.toFixed(3);
-      
-      const suggestedLayers = h2 > 0 ? Math.ceil(h2 / 7.0) : 1;
-      autoLayersInput.value = suggestedLayers;
       renderStandardLayers(); 
     }
     
     function renderStandardLayers(){
       const H2m = parseFloat(H2_input.value) || 0;
-      const layers = parseInt(autoLayersInput.value) || 1;
+      const layers = H2m > 0 ? Math.ceil(H2m / 7.0) : 1;
       const perLayer = layers > 0 ? (H2m / layers) : 0;
       
       let html = '';
@@ -438,14 +433,12 @@
     
     document.getElementById('totalFlowH').addEventListener('input', syncH2);
     document.getElementById('H3').addEventListener('input', syncH2);
-    autoLayersInput.addEventListener('input', renderStandardLayers);
 
     function captureInputs(){
       const base = {
         D: D(), totalFlowH: totalFlowH(), H3: H3(), H1: parseFloat(document.getElementById('H1').value)||0, A1: parseFloat(document.getElementById('A1').value)||0,
         A2: parseFloat(document.getElementById('A2').value)||0, A3: parseFloat(document.getElementById('A3').value)||0, H4: parseFloat(document.getElementById('H4').value)||0,
         A4: parseFloat(document.getElementById('A4').value)||0, B: parseFloat(document.getElementById('B').value)||0, sealThick: parseFloat(document.getElementById('sealThick').value)||0,
-        autoLayers: parseInt(autoLayersInput.value)||1,
         φ1: document.getElementById('φ1')?.value, L1: document.getElementById('L1')?.value, φ2: document.getElementById('φ2')?.value, L2: document.getElementById('L2')?.value,
         φ3: document.getElementById('φ3')?.value, L3: document.getElementById('L3')?.value, φ4: document.getElementById('φ4')?.value, L4: document.getElementById('L4')?.value,
         φ17: document.getElementById('φ17')?.value, L17: document.getElementById('L17')?.value, φ18: document.getElementById('φ18')?.value, L18: document.getElementById('L18')?.value,
@@ -473,7 +466,6 @@
       if(!data) return;
       if(data.totalFlowH) document.getElementById('totalFlowH').value = data.totalFlowH;
       if(data.H3) document.getElementById('H3').value = data.H3;
-      if(data.autoLayers) autoLayersInput.value = data.autoLayers;
       
       let h2 = totalFlowH() - H3(); 
       if(h2 < 0) h2 = 0; 
@@ -494,7 +486,7 @@
       const H3_m=H3(), A3_m=parseFloat(document.getElementById('A3').value)||0;
       const H4_m=parseFloat(document.getElementById('H4').value)||0, A4_m=parseFloat(document.getElementById('A4').value)||0;
       const B_m=parseFloat(document.getElementById('B').value)||0, seal_m=parseFloat(document.getElementById('sealThick').value)||0;
-      const layers = parseInt(autoLayersInput.value) || 1;
+      const layers = H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1;
       const perLayer = layers > 0 ? (H2_m / layers) : 0;
       
       // 1. 模板
@@ -720,7 +712,7 @@
       container.innerHTML = records.map((r, idx)=>{
         const inp = r.inputs, res = r.results;
         const H2_m = inp.totalFlowH - inp.H3;
-        const layers = inp.autoLayers || (H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1);
+        const layers = H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1;
         
         let layerHtml = '';
         for(let i=1; i<=layers; i++){
@@ -897,7 +889,7 @@
       const rec = loadRecords().find(r=>r.id==id); if(!rec) return;
       const inp = rec.inputs, res = rec.results;
       const H2_m = inp.totalFlowH - inp.H3;
-      const layers = inp.autoLayers || (H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1);
+      const layers = H2_m > 0 ? Math.ceil(H2_m / 7.0) : 1;
       
       let layerText = '';
       for(let i=1; i<=layers; i++){
@@ -945,16 +937,13 @@ ${layerText}【底板及圈梁】
   钢筋： ${inp.priceLabRebar}元/t
   砼： ${inp.priceLabConc}元/m³
   砌体： ${inp.priceLabMasonry}元/块
-
 【材料】
   钢筋： ${inp.priceMatRebar}元/t 
   砼： ${inp.priceMatConc}元/m³
   砖： ${inp.priceMatBrick}元/块
-
 【机械】
   长臂挖机： ${inp.priceMachExc}元/m³
   土方外运： ${inp.priceMachTrans}元/m³
-
 【费率】
   管理费： ${inp.manageRate}%
   利润： ${inp.profitRate}% 
